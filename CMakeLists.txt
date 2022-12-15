@@ -1,11 +1,19 @@
 cmake_minimum_required(VERSION 3.20)
-set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Build for 10.11")
 
 project(elastika_plugin VERSION 0.9.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 17)
+
+if (NOT ${ELASTIKA_COPY_PLUGIN_AFTER_BUILD})
+  set(ELASTIKA_COPY_PLUGIN_AFTER_BUILD FALSE)
+endif()
+if (${ELASTIKA_COPY_PLUGIN_AFTER_BUILD})
+  message(STATUS "Elastika Plugin will be copied after build")
+else()
+  message(STATUS "Elastika Plugin will require manual copy after build")
+endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
   # Any Clang or any GCC
@@ -21,7 +29,7 @@ add_library(elastika-dsp STATIC
         ${ELASTIKA_DIR}/mesh_hex.cpp
         ${ELASTIKA_DIR}/mesh_physics.cpp
         )
-target_include_directories(elastika-dsp PUBLIC ${ELASTIKA_DIR})
+target_include_directories(elastika-dsp PUBLIC ${ELASTIKA_DIR} libs/simde)
 
 add_subdirectory(libs/JUCE)
 add_subdirectory(libs/clap-juce-extensions)
@@ -35,13 +43,14 @@ juce_add_plugin(elastika-filter
 
     IS_SYNTH FALSE 
 
-    COPY_PLUGIN_AFTER_BUILD TRUE
+    COPY_PLUGIN_AFTER_BUILD ${ELASTIKA_COPY_PLUGIN_AFTER_BUILD}
 
     FORMATS AU VST3 Standalone
 )
 
 clap_juce_extensions_plugin(TARGET elastika-filter
         CLAP_ID "org.cosinekitty.sapphire.elastika"
+        CLAP_PROCESS_EVENTS_RESOLUTION_SAMPLES 32
         CLAP_FEATURES effect filter)
 
 
