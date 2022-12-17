@@ -31,6 +31,9 @@ add_library(elastika-dsp STATIC
         ${ELASTIKA_DIR}/mesh_physics.cpp
         )
 target_include_directories(elastika-dsp PUBLIC ${ELASTIKA_DIR} libs/simde)
+if (WIN32)
+  target_compile_definitions(epastika-dsp PUBLIC _USE_MATH_DEFINES __SSE2__)
+endif()
 
 add_subdirectory(libs/JUCE)
 add_subdirectory(libs/clap-juce-extensions)
