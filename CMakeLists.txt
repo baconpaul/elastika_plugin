@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Build for 10.11")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 project(elastika_plugin VERSION 0.9.0 LANGUAGES CXX)
 
@@ -30,6 +31,9 @@ add_library(elastika-dsp STATIC
         ${ELASTIKA_DIR}/mesh_physics.cpp
         )
 target_include_directories(elastika-dsp PUBLIC ${ELASTIKA_DIR} libs/simde)
+if (WIN32)
+  target_compile_definitions(elastika-dsp PUBLIC _USE_MATH_DEFINES __SSE2__)
+endif()
 
 add_subdirectory(libs/JUCE)
 add_subdirectory(libs/clap-juce-extensions)
