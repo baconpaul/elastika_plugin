@@ -9,6 +9,7 @@
 */
 
 #include "ElastikaProcessor.h"
+#include "ElastikaEditor.h"
 
 //==============================================================================
 ElastikaAudioProcessor::ElastikaAudioProcessor()
@@ -120,12 +121,12 @@ void ElastikaAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 //==============================================================================
 bool ElastikaAudioProcessor::hasEditor() const
 {
-    return false; // (change this to false if you choose to not supply an editor)
+    return true; // (change this to false if you choose to not supply an editor)
 }
 
 juce::AudioProcessorEditor *ElastikaAudioProcessor::createEditor()
 {
-    return nullptr;
+    return new ElastikaEditor(*this);
 }
 
 //==============================================================================
