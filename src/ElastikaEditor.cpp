@@ -3,7 +3,6 @@
 #include "ElastikaBinary.h"
 #include "sapphire_lnf.h"
 
-//==============================================================================
 ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     : juce::AudioProcessorEditor(&p), processor(p)
 {
@@ -17,11 +16,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
 
     std::unique_ptr<juce::XmlElement> xml = juce::XmlDocument::parse(ElastikaBinary::elastika_svg);
     background = juce::Drawable::createFromSVG(*xml);
-    // background->setTransform(juce::RectanglePlacement{128}.getTransformToFit(svgDefaultBounds,
-    // getLocalBounds().toFloat())); tosvg =
-    // juce::AffineTransform::fromTargetPoints(juce::Point{0.f, 0.f}, ob.getTopLeft().toFloat(),
-    // juce::Point{60.96f, 0.f}, ob.getTopRight().toFloat(), juce::Point{60.96f, 128.5f},
-    // ob.getBottomRight().toFloat()); addAndMakeVisible(*background);
+
     //  Find knobs.
     std::cout << "Top tag name: " << xml->getTagName() << std::endl;
     auto controls = xml->getChildByAttribute("id", "ControlLayer");
@@ -40,27 +35,17 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
         {
             float cx = control->getStringAttribute("cx").getFloatValue();
             float cy = control->getStringAttribute("cy").getFloatValue();
-            // knobs.emplace_back(cx, cy);
             auto kn = std::make_unique<juce::Slider>();
             kn->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
             kn->setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
             background->addAndMakeVisible(*kn);
             kn->setSize(8, 8);
-            // 1.05 offset determined through trial and error.
-            juce::Point<float> real{cx + 1.05f, cy};
+            juce::Point<float> real{cx + dx, cy + dy};
             juce::Point<int> rounded = real.toInt();
-            // rounded.applyTransform(tosvg);
-            // real.applyTransform(tosvg);
-            std::cout << "Rounded diff: " << (real - rounded.toFloat()).toString() << std::endl;
             kn->setCentrePosition(rounded);
             kn->setTransform(juce::AffineTransform::translation(real.getX() - rounded.getX(),
                                                                 real.getY() - rounded.getY()));
-            // kn->setTransform(tosvg);
-            // kn->setTransform(tosvg.translated(cx - 4.f, cy - 4.f));
-            // addAndMakeVisible(*kn);
             knobs.push_back(std::move(kn));
-            knob_positions.emplace_back(cx, cy);
-            std::cout << "Emplaced knob " << id << std::endl;
         }
     }
 
@@ -96,67 +81,11 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
 
 ElastikaEditor::~ElastikaEditor() {}
 
-//==============================================================================
-void ElastikaEditor::paintOverChildren(juce::Graphics &g)
-{
-    // juce::ColourGradient cg(juce::Colour(240, 220, 220), 0, 0, juce::Colour(220, 220, 220), 0,
-    // getHeight(),
-    //                         false);
-    // g.setGradientFill(cg);
-    // g.fillRect(getLocalBounds());
-    // g.setColour(juce::Colours::black);
-    // g.setFont(30);
-    // g.drawText("Elastika", getLocalBounds(), juce::Justification::centredTop);
-    // background->draw(g, 0.0);
-#if 0
-  g.setColour(juce::Colour::fromRGB(0, 0, 0));
-  for (const auto& knob : knobs) {
-    juce::Rectangle<float> ul{knob.first, knob.second, 2.f, 2.f};
-    ul = getLocalArea(background.get(), ul);
-    g.fillRect(ul);
-    std::cout << "Filling region from ("
-              << knob.first - 1.f << "," << knob.second - 1.f << ") to "
-              << knob.first + 1.f << "," << knob.second + 1.f << ")" << std::endl;
-    //g.fillEllipse(knob.first - 2.f, knob.second - 2.f, 2.f, 2.f);
-  }
-#endif
-}
-
 void ElastikaEditor::resized()
 {
     if (background)
     {
-        // background->setTransform(juce::RectanglePlacement{128}.getTransformToFit(svgDefaultBounds,
-        // getLocalBounds().toFloat()));
         background->setTransformToFit(getLocalBounds().toFloat(), juce::RectanglePlacement());
-#if 0
-    for (int i = 0; i < knobs.size(); i++) {
-      auto pos = knob_positions[i];
-      //juce::Rectangle<int> ul{int(pos.first - 3.5f), int(pos.second - 3.5f), 8, 8};
-      //juce::Rectangle<float> real{pos.first - 3.5f, pos.second - 3.5f, 8, 8};
-      //ul = getLocalArea(background.get(), ul);
-      //real = getLocalArea(background.get(), real);
-      //std::cout << "Real location bounds: " << real.toString() << std::endl;
-      //knobs[i]->setBounds(ul);
-      knobs[i]->setSize(8, 8);
-      auto ob = background->getDrawableBounds();
-      juce::AffineTransform t1 = juce::AffineTransform::fromTargetPoints(juce::Point{0.f, 0.f}, ob.getTopLeft(), juce::Point{60.96f, 0.f}, ob.getTopRight(), juce::Point{60.96f, 128.5f}, ob.getBottomRight());
-      juce::Point<int> c1{int(pos.first), int(pos.second)};
-      juce::Point<float> c2{pos.first, pos.second};
-      c1.applyTransform(t1);
-      //std::cout << "Original position: " << c2.toString() << std::endl;
-      c2.applyTransform(tosvg);
-      //std::cout << "Transformed position: " << c2.toString() << std::endl;
-      //c1 = getLocalPoint(background.get(), c1);
-      //c2 = getLocalPoint(background.get(), c2);
-      knobs[i]->setTransform(juce::AffineTransform::translation(c2.getX() - 4.f, c2.getY() - 4.f));
-      //knobs[i]->setTransform(juce::AffineTransform::translation(c2.getX(), c2.getY()).followedBy(background->getTransform()));
-      //knobs[i]->setTransform(juce::AffineTransform::translation(c2.getX() - 4.f, c2.getY() - 4.f).followedBy(background->getTransform()));
-      //knobs[i]->setCentrePosition(c1);
-      //knobs[i]->setTransform(juce::AffineTransform{}.translated(c2.getX() - c1.getX(), c2.getY() - c1.getY()));
-      //knobs[i]->setTransform(juce::AffineTransform{}.translated(real.getX() - ul.getX(), real.getY() - ul.getY()));
-    }
-#endif
     }
 #if 0
     auto slsz = getWidth() / 4 * 0.8;
