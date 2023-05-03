@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "elastika_engine.hpp"
@@ -49,8 +47,9 @@ class ElastikaAudioProcessor : public juce::AudioProcessor
     void getStateInformation(juce::MemoryBlock &destData) override;
     void setStateInformation(const void *data, int sizeInBytes) override;
 
-    juce::AudioParameterFloat *friction, *span, *stiffness, *curl, *mass, *drive, *gain,
-        *inputTilt, *outputTilt;
+    juce::AudioParameterFloat *friction, *span, *stiffness, *curl, *mass, *drive, *gain, *inputTilt,
+        *outputTilt;
+
   private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElastikaAudioProcessor)
 };
