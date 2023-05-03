@@ -1,6 +1,7 @@
 #include "ElastikaProcessor.h"
 #include "ElastikaEditor.h"
 #include "ElastikaBinary.h"
+#include "sapphire_lnf.h"
 
 //==============================================================================
 ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
@@ -8,7 +9,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    lnf = std::make_unique<SapphireLookAndFeel>();
+    lnf = std::make_unique<sapphire::LookAndFeel>();
     setLookAndFeel(lnf.get());
 
     setSize(300, 600);

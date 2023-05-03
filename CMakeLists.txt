@@ -71,6 +71,7 @@ clap_juce_extensions_plugin(TARGET elastika-filter
 
 
 target_sources(elastika-filter PRIVATE
+  src/sapphire_lnf.cc
   src/ElastikaProcessor.cpp
   src/ElastikaEditor.cpp
 )
