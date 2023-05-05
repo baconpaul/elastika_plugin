@@ -20,7 +20,6 @@ class LookAndFeel : public juce::LookAndFeel_V4
     std::unique_ptr<juce::Drawable> knob_marker_;
     std::unique_ptr<juce::Image> knob_cache_;
 
-    int last_rotary_width_;
-    int last_rotary_height_;
+    int rotary_scale_factor_;
 };
 } // namespace sapphire
