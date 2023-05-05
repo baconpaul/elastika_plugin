@@ -41,6 +41,7 @@ add_subdirectory(libs/clap-juce-extensions)
 
 file(GLOB ELASTIKA_RESOURCES_GLOB
     ${CMAKE_SOURCE_DIR}/libs/sapphire/res/*.svg
+    ${CMAKE_SOURCE_DIR}/res/*.svg
     )
 
 juce_add_binary_data(elastika-binary

@@ -8,7 +8,10 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    lnf = std::make_unique<sapphire::LookAndFeel>();
+    auto knob_xml = juce::XmlDocument::parse(ElastikaBinary::knob_svg);
+    auto marker_xml = juce::XmlDocument::parse(ElastikaBinary::knobmarker_svg);
+    lnf = std::make_unique<sapphire::LookAndFeel>(juce::Drawable::createFromSVG(*knob_xml),
+                                                  juce::Drawable::createFromSVG(*marker_xml));
     setLookAndFeel(lnf.get());
 
     setSize(300, 600);

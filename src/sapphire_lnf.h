@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+#include <string>
 #include "juce_gui_basics/juce_gui_basics.h"
 
 namespace sapphire
@@ -7,15 +9,18 @@ namespace sapphire
 class LookAndFeel : public juce::LookAndFeel_V4
 {
   public:
+    LookAndFeel(std::unique_ptr<juce::Drawable> knob, std::unique_ptr<juce::Drawable> marker);
+
     void drawRotarySlider(juce::Graphics &g, int x, int y, int width, int height, float sliderPos,
                           float rotaryStartAngle, float rotaryEndAngle,
                           juce::Slider &slider) override;
 
-    juce::Slider::SliderLayout getSliderLayout(juce::Slider &slider) override;
-
   private:
-    juce::Colour grey = juce::Colour::fromRGB(34, 34, 34);
-    juce::Colour light_grey = juce::Colour::fromRGB(136, 136, 136);
-    juce::Colour dark_grey = juce::Colour::fromRGB(25, 25, 25);
+    std::unique_ptr<juce::Drawable> knob_;
+    std::unique_ptr<juce::Drawable> knob_marker_;
+    std::unique_ptr<juce::Image> knob_cache_;
+
+    int last_rotary_width_;
+    int last_rotary_height_;
 };
 } // namespace sapphire
