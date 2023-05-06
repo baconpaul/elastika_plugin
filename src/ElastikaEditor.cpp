@@ -3,6 +3,39 @@
 #include "ElastikaBinary.h"
 #include "sapphire_lnf.h"
 
+struct TestLnF : public juce::LookAndFeel_V4
+{
+    void drawRotarySlider(juce::Graphics &g, int x, int y, int width, int height, float sliderPos,
+                          const float rotaryStartAngle, const float rotaryEndAngle,
+                          juce::Slider &) override
+    {
+        auto radius = (float)juce::jmin(width / 2, height / 2) - 4.0f;
+        auto centreX = (float)x + (float)width * 0.5f;
+        auto centreY = (float)y + (float)height * 0.5f;
+        auto rx = centreX - radius;
+        auto ry = centreY - radius;
+        auto rw = radius * 2.0f;
+        auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
+        // fill
+        g.setColour(juce::Colours::orange);
+        g.fillEllipse(rx, ry, rw, rw);
+
+        // outline
+        g.setColour(juce::Colours::red);
+        g.drawEllipse(rx, ry, rw, rw, 1.0f);
+
+        juce::Path p;
+        auto pointerLength = radius * 0.33f;
+        auto pointerThickness = 2.0f;
+        p.addRectangle(-pointerThickness * 0.5f, -radius, pointerThickness, pointerLength);
+        p.applyTransform(juce::AffineTransform::rotation(angle).translated(centreX, centreY));
+
+        // pointer
+        g.setColour(juce::Colours::yellow);
+        g.fillPath(p);
+    }
+};
+
 ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     : juce::AudioProcessorEditor(&p), processor(p)
 {
@@ -10,8 +43,12 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     // editor's size to whatever you need it to be.
     auto knob_xml = juce::XmlDocument::parse(ElastikaBinary::knob_svg);
     auto marker_xml = juce::XmlDocument::parse(ElastikaBinary::knobmarker_svg);
+#if 1
     lnf = std::make_unique<sapphire::LookAndFeel>(juce::Drawable::createFromSVG(*knob_xml),
                                                   juce::Drawable::createFromSVG(*marker_xml));
+#else
+    lnf = std::make_unique<TestLnF>();
+#endif
     setLookAndFeel(lnf.get());
 
     setSize(300, 600);
@@ -19,6 +56,8 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
 
     std::unique_ptr<juce::XmlElement> xml = juce::XmlDocument::parse(ElastikaBinary::elastika_svg);
     background = juce::Drawable::createFromSVG(*xml);
+    background->setInterceptsMouseClicks(false, true);
+    addAndMakeVisible(*background);
 
     //  Find knobs.
     std::cout << "Top tag name: " << xml->getTagName() << std::endl;
@@ -41,6 +80,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
             auto kn = std::make_unique<juce::Slider>();
             kn->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
             kn->setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
+            kn->setPopupMenuEnabled(true);
             background->addAndMakeVisible(*kn);
             kn->setSize(8, 8);
             juce::Point<float> real{cx + dx, cy + dy};
@@ -78,7 +118,6 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     addKnob("OutTilt", *(processor.outputTilt));
 #endif
 
-    addAndMakeVisible(*background);
     resized();
 }
 
