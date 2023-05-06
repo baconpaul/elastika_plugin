@@ -9,6 +9,7 @@ LookAndFeel::LookAndFeel(std::unique_ptr<juce::Drawable> knob,
                          std::unique_ptr<juce::Drawable> marker)
     : knob_(std::move(knob)), knob_marker_(std::move(marker)), rotary_scale_factor_(0)
 {
+    setColour(juce::Slider::thumbColourId, juce::Colour(171, 157, 74));
 }
 
 void LookAndFeel::drawRotarySlider(juce::Graphics &g, int x, int y, int width, int height,

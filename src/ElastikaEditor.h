@@ -16,6 +16,7 @@ class ElastikaEditor : public juce::AudioProcessorEditor
     std::unique_ptr<juce::LookAndFeel_V4> lnf;
     std::unique_ptr<juce::LookAndFeel_V4> small_lnf; // Specifically for small elements.
     std::unique_ptr<juce::Drawable> background;
+    std::vector<std::unique_ptr<juce::Component>> elements;
     std::vector<std::unique_ptr<juce::Slider>> knobs;
     std::vector<std::unique_ptr<juce::SliderParameterAttachment>> attachments;
     std::vector<std::unique_ptr<juce::Label>> labels;

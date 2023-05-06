@@ -81,30 +81,50 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
         // Offsets from declared controls in the SVG. Determined through extensive trial and error.
         float dx = 0.5f; // was 1.05f when sliders were knobs by mistake
         float dy = 0.5f; // Seems to be based on the knob size (11; compare knob size 6)
+        float cx = control->getStringAttribute("cx").getFloatValue();
+        float cy = control->getStringAttribute("cy").getFloatValue();
         if (id.endsWith("knob") || id.endsWith("atten"))
         {
-            float cx = control->getStringAttribute("cx").getFloatValue();
-            float cy = control->getStringAttribute("cy").getFloatValue();
             auto kn = std::make_unique<juce::Slider>();
             kn->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
             kn->setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
             kn->setPopupMenuEnabled(true);
             background->addAndMakeVisible(*kn);
-            kn->setSize(11, 11);
-            if (id.endsWith("atten"))
+            if (id.endsWith("knob"))
+            {
+                kn->setSize(11, 11);
+                dx = 0.5f;
+                dy = 0.5f;
+            }
+            else if (id.endsWith("atten"))
             {
                 kn->setLookAndFeel(small_lnf.get());
                 kn->setSize(6, 6);
                 dx = 0.9166f;
                 dy = 0.9166f;
             }
-            juce::Point<float> real{cx + dx, cy + dy};
-            juce::Point<int> rounded = real.toInt();
-            kn->setCentrePosition(rounded);
-            kn->setTransform(juce::AffineTransform::translation(real.getX() - rounded.getX(),
-                                                                real.getY() - rounded.getY()));
-            knobs.push_back(std::move(kn));
+            elements.push_back(std::move(kn));
         }
+        else if (id.endsWith("slider"))
+        {
+            auto sl = std::make_unique<juce::Slider>();
+            sl->setSliderStyle(juce::Slider::LinearVertical);
+            sl->setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
+            background->addAndMakeVisible(*sl);
+            sl->setSize(8, 28);
+            dx = 0.6875f;
+            dy = 0.6875f;
+            elements.push_back(std::move(sl));
+        }
+        else
+        {
+            continue;
+        }
+        juce::Point<float> real{cx + dx, cy + dy};
+        juce::Point<int> rounded = real.toInt();
+        elements.back()->setCentrePosition(rounded);
+        elements.back()->setTransform(juce::AffineTransform::translation(
+            real.getX() - rounded.getX(), real.getY() - rounded.getY()));
     }
 
 #if 0
