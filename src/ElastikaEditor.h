@@ -20,7 +20,7 @@ class ElastikaEditor : public juce::AudioProcessorEditor
     std::vector<std::unique_ptr<juce::Label>> labels;
 
     // Offsets from declared controls in the SVG. Determined through extensive trial and error.
-    float dx = 1.05f;
+    float dx = 0.5f; // was 1.05f when sliders were knobs by mistake
     float dy = 0.f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElastikaEditor)
