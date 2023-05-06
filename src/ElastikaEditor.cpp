@@ -43,9 +43,14 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     // editor's size to whatever you need it to be.
     auto knob_xml = juce::XmlDocument::parse(ElastikaBinary::knob_svg);
     auto marker_xml = juce::XmlDocument::parse(ElastikaBinary::knobmarker_svg);
+    auto small_knob_xml = juce::XmlDocument::parse(ElastikaBinary::knobsmall_svg);
+    auto small_marker_xml = juce::XmlDocument::parse(ElastikaBinary::knobmarkersmall_svg);
 #if 1
     lnf = std::make_unique<sapphire::LookAndFeel>(juce::Drawable::createFromSVG(*knob_xml),
                                                   juce::Drawable::createFromSVG(*marker_xml));
+    small_lnf =
+        std::make_unique<sapphire::LookAndFeel>(juce::Drawable::createFromSVG(*small_knob_xml),
+                                                juce::Drawable::createFromSVG(*small_marker_xml));
 #else
     lnf = std::make_unique<TestLnF>();
 #endif
@@ -73,7 +78,10 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
                   << "; x: " << control->getStringAttribute("cx")
                   << "; y: " << control->getStringAttribute("cy") << std::endl;
         const juce::String &id = control->getStringAttribute("id");
-        if (id.endsWith("knob"))
+        // Offsets from declared controls in the SVG. Determined through extensive trial and error.
+        float dx = 0.5f; // was 1.05f when sliders were knobs by mistake
+        float dy = 0.5f; // Seems to be based on the knob size (11; compare knob size 6)
+        if (id.endsWith("knob") || id.endsWith("atten"))
         {
             float cx = control->getStringAttribute("cx").getFloatValue();
             float cy = control->getStringAttribute("cy").getFloatValue();
@@ -83,6 +91,13 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
             kn->setPopupMenuEnabled(true);
             background->addAndMakeVisible(*kn);
             kn->setSize(11, 11);
+            if (id.endsWith("atten"))
+            {
+                kn->setLookAndFeel(small_lnf.get());
+                kn->setSize(6, 6);
+                dx = 0.9166f;
+                dy = 0.9166f;
+            }
             juce::Point<float> real{cx + dx, cy + dy};
             juce::Point<int> rounded = real.toInt();
             kn->setCentrePosition(rounded);
