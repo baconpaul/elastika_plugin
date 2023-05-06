@@ -2,8 +2,6 @@
 
 #include "sapphire_lnf.h"
 
-using juce::degreesToRadians;
-
 namespace sapphire
 {
 
@@ -38,9 +36,9 @@ void LookAndFeel::drawRotarySlider(juce::Graphics &g, int x, int y, int width, i
         rotary_scale_factor_ = sf;
     }
 
-    // sliderPos is in range [0,1]. We want the knobs to go from 8 oclock to 4 oclock, aka 120
-    // degrees CCW and 120 degrees CW. 0.5 represents noon, or 0 degrees rotation.
-    float rads = juce::jmap(sliderPos, degreesToRadians(-120.f), degreesToRadians(120.f));
+    // sliderPos is in range [0,1]. Map it onto the start/end angles. 0.5 should be noon by default.
+    auto rot_params = slider.getRotaryParameters();
+    float rads = juce::jmap(sliderPos, rot_params.startAngleRadians, rot_params.endAngleRadians);
     auto rotation = juce::AffineTransform::rotation(rads, xmid, ymid);
     g.addTransform(rotation);
 #if 1
