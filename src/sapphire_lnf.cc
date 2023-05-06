@@ -19,6 +19,10 @@ void LookAndFeel::drawRotarySlider(juce::Graphics &g, int x, int y, int width, i
 {
     const int sf = static_cast<int>(
         std::ceil(juce::Component::getApproximateScaleFactorForComponent(&slider)));
+    const int swidth = width * sf;
+    const int sheight = height * sf;
+    const float xmid = float(x + width) / 2.f;
+    const float ymid = float(y + width) / 2.f;
     if (sf != rotary_scale_factor_)
     {
         // Must recreate and recache the SVG image.
@@ -26,15 +30,21 @@ void LookAndFeel::drawRotarySlider(juce::Graphics &g, int x, int y, int width, i
             std::make_unique<juce::Image>(juce::Image::ARGB, width * sf, height * sf, true);
         juce::Graphics cg(*knob_cache_);
         // Opacities taken from the SVG files, since Juce isn't smart enough to just use them, sigh.
-        knob_->drawWithin(cg, juce::Rectangle{0, 0, width * sf, height * sf}.toFloat(),
+        knob_->drawWithin(cg, juce::Rectangle{0, 0, swidth, sheight}.toFloat(),
                           juce::RectanglePlacement(), 1.f);
-        knob_marker_->drawWithin(cg, juce::Rectangle{0, 0, width * sf, height * sf}.toFloat(),
+        knob_marker_->drawWithin(cg, juce::Rectangle{0, 0, swidth, sheight}.toFloat(),
                                  juce::RectanglePlacement(), 1.f);
+
         rotary_scale_factor_ = sf;
     }
 
+    // sliderPos is in range [0,1]. We want the knobs to go from 8 oclock to 4 oclock, aka 120
+    // degrees CCW and 120 degrees CW. 0.5 represents noon, or 0 degrees rotation.
+    float rads = juce::jmap(sliderPos, degreesToRadians(-120.f), degreesToRadians(120.f));
+    auto rotation = juce::AffineTransform::rotation(rads, xmid, ymid);
+    g.addTransform(rotation);
 #if 1
-    g.drawImage(*knob_cache_, x, y, width, height, 0, 0, width * sf, height * sf);
+    g.drawImage(*knob_cache_, x, y, width, height, 0, 0, swidth, sheight);
 #else
     // Maybe do this instead, and set to a buffered image at the component level.
     knob_->drawWithin(g, juce::Rectangle{x, y, width, height}.toFloat(), juce::RectanglePlacement(),
