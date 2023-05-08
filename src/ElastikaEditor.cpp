@@ -112,6 +112,15 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
             sl->setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
             background->addAndMakeVisible(*sl);
             sl->setSize(8, 28);
+            sl->setMouseDragSensitivity(28);
+            sl->setRange(0, 1);
+            sl->setValue(0.5);
+            sl->setDoubleClickReturnValue(true, 0.5);
+            // TODO: Get the "snap to mouse position" to work with the scaling we have where we only
+            // use 90% of the track (the remaining 10% is for the bottom part of the thumb; the
+            // thumb's "position" is the very top pixel of the thumb). Until then, it doesn't work
+            // right throughout the whole track, so we set this to false.
+            sl->setSliderSnapsToMousePosition(false);
             dx = 0.6875f;
             dy = 0.6875f;
             elements.push_back(std::move(sl));

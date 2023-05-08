@@ -20,35 +20,21 @@ void LookAndFeel::drawLinearSlider(juce::Graphics &g, int x, int y, int width, i
                                    float sliderPos, float minSliderPos, float maxSliderPos,
                                    const Slider::SliderStyle style, Slider &slider)
 {
+    // Only specialized version for vertical sliders.
     if (style != Slider::LinearVertical)
     {
         juce::LookAndFeel_V4::drawLinearSlider(g, x, y, width, height, sliderPos, minSliderPos,
                                                maxSliderPos, style, slider);
         return;
     }
-    std::cout << "y = " << y << "; height = " << height << "; "
-              << "sliderPos = " << sliderPos << "; minSliderPos = " << minSliderPos
-              << "; maxSliderPos = " << maxSliderPos << std::endl;
 
     const float unit = float(height) / 100.f;
 
-    // Draw the slider track.
-    // The width value is taken from LookAndFeel_V4.
-    Colour bgc = findColour(Slider::trackColourId);
+    // Draw the slider track. The width value is taken from LookAndFeel_V4.
     float trackwidth = std::min(6.f, float(width) * 0.25f);
     float realX = float(x) + float(width) * 0.5f - trackwidth * 0.5f;
-#if 0
-    const Point<float> start{float(x) + float(width) * 0.5f, float(height + y)};
-    const Point<float> end{start.x, float(y)};
-    juce::Path track;
-    track.startNewSubPath(start);
-    track.lineTo(end);
-    g.setColour(findColour(Slider::backgroundColourId));
-    g.strokePath(track, {trackwidth, juce::PathStrokeType::curved, juce::PathStrokeType::rounded});
-#else
     g.setColour(findColour(Slider::backgroundColourId));
     g.fillRoundedRectangle(realX, y, trackwidth, height, 0.5f);
-#endif
 
     // Draws a slider thumb reminiscent of the one used in VCV rack.
     // Composed of a darker color in the middle, flanked by two lighter colors, flanked by black on
@@ -57,46 +43,48 @@ void LookAndFeel::drawLinearSlider(juce::Graphics &g, int x, int y, int width, i
     // The slider thumb should take up a total of 10% of the track. It shouldn't go over the track
     // edges. So we need to rescale the actual slider position to only go to 90% of the maximum
     // value.
-    const float normalizedPos = juce::jmap<float>(sliderPos, height, y, 0.f, 0.9f);
-    const float sliderBot = (1.f - normalizedPos) * float(height);
+    const float normalizedPos =
+        y + juce::jmap<float>(sliderPos, height, y, 0.9f, 0.f) * float(height - y);
 
-    Colour thumb = findColour(Slider::thumbColourId);
+    const Colour thumb = findColour(Slider::thumbColourId);
+    const Colour brighter = thumb.brighter();
+    const Colour brightest = thumb.brighter();
     realX += trackwidth * 0.15f;
     trackwidth *= 0.7f;
 
-    // Bottom part, the brightest color.
-    juce::Rectangle<float> part{realX, sliderBot - 2 * unit, trackwidth, 2 * unit};
-    g.setColour(thumb.brighter().brighter());
+    // Top part, the brightest color.
+    juce::Rectangle<float> part{realX, normalizedPos, trackwidth, 2 * unit};
+    g.setColour(brightest);
     g.fillRect(part);
-    // White part.
-    part.setY(part.getY() - part.getHeight() - unit);
-    part.setHeight(unit);
-    g.setColour(juce::Colours::antiquewhite);
+    // Black part.
+    part.setY(part.getY() + part.getHeight());
+    part.setHeight(2 * unit);
+    g.setColour(juce::Colours::black);
     g.fillRect(part);
     // Slightly less bright color.
-    part.setY(part.getY() - part.getHeight() - unit);
-    part.setHeight(unit);
-    g.setColour(thumb.brighter());
+    part.setY(part.getY() + part.getHeight());
+    part.setHeight(1 * unit);
+    g.setColour(brighter);
     g.fillRect(part);
     // Center part, regular color.
-    part.setY(part.getY() - part.getHeight() - 2 * unit);
+    part.setY(part.getY() + part.getHeight());
     part.setHeight(2 * unit);
     g.setColour(thumb);
     g.fillRect(part);
-    // Continuing up, less bright color.
-    part.setY(part.getY() - part.getHeight() - unit);
-    part.setHeight(unit);
-    g.setColour(thumb.brighter());
+    // Continuing down, less bright color.
+    part.setY(part.getY() + part.getHeight());
+    part.setHeight(1 * unit);
+    g.setColour(brighter);
     g.fillRect(part);
-    // Continuing up, black part.
-    part.setY(part.getY() - part.getHeight() - unit);
-    part.setHeight(unit);
-    g.setColour(juce::Colours::black);
+    // Continuing down, white-ish part.
+    part.setY(part.getY() + part.getHeight());
+    part.setHeight(1 * unit);
+    g.setColour(juce::Colours::antiquewhite);
     g.fillRect(part);
     // Final part, brightest color again.
-    part.setY(part.getY() - part.getHeight() - 2 * unit);
-    part.setHeight(unit);
-    g.setColour(thumb.brighter().brighter());
+    part.setY(part.getY() + part.getHeight());
+    part.setHeight(1 * unit);
+    g.setColour(brightest);
     g.fillRect(part);
 }
 
@@ -139,6 +127,21 @@ void LookAndFeel::drawRotarySlider(juce::Graphics &g, int x, int y, int width, i
     knob_marker_->drawWithin(g, juce::Rectangle{x, y, width, height}.toFloat(),
                              juce::RectanglePlacement(), 1.f);
 #endif
+}
+
+Slider::SliderLayout LookAndFeel::getSliderLayout(Slider &slider)
+{
+    auto style = slider.getSliderStyle();
+    // TODO: Rotary slider version of this method as well.
+    if (style != Slider::LinearVertical)
+    {
+        return LookAndFeel_V4::getSliderLayout(slider);
+    }
+    Slider::SliderLayout layout;
+    layout.sliderBounds = slider.getBounds();
+    // TODO: Text box bounds for typein on right-click.
+    layout.textBoxBounds = juce::Rectangle{0, 0, 0, 0};
+    return layout;
 }
 
 } // namespace sapphire
