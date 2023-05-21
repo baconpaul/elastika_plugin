@@ -1,6 +1,7 @@
 #include "ElastikaProcessor.h"
 #include "ElastikaEditor.h"
 #include "ElastikaBinary.h"
+#include "led_vu.h"
 #include "sapphire_lnf.h"
 
 struct TestLnF : public juce::LookAndFeel_V4
@@ -34,20 +35,6 @@ struct TestLnF : public juce::LookAndFeel_V4
         g.setColour(juce::Colours::yellow);
         g.fillPath(p);
     }
-};
-
-class LedVu : public juce::Component
-{
-  public:
-    void paint(juce::Graphics &g) override
-    {
-        float diam = std::min<float>(getWidth(), getHeight()) - outerLine;
-        juce::LookAndFeel_V2::drawGlassSphere(g, 0, 0, diam, col, outerLine);
-    }
-
-  private:
-    static constexpr float outerLine = 0.2f;
-    const juce::Colour col = juce::Colours::white;
 };
 
 ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
@@ -141,7 +128,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
         }
         else if (id.endsWith("cv") || id.endsWith("input") || id.endsWith("output"))
         {
-            auto led = std::make_unique<LedVu>();
+            auto led = std::make_unique<sapphire::LedVu>();
             background->addAndMakeVisible(*led);
             led->setSize(3, 3);
             dx = 0.5f;
