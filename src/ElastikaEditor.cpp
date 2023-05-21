@@ -36,6 +36,20 @@ struct TestLnF : public juce::LookAndFeel_V4
     }
 };
 
+class LedVu : public juce::Component
+{
+  public:
+    void paint(juce::Graphics &g) override
+    {
+        float diam = std::min<float>(getWidth(), getHeight()) - outerLine;
+        juce::LookAndFeel_V2::drawGlassSphere(g, 0, 0, diam, col, outerLine);
+    }
+
+  private:
+    static constexpr float outerLine = 0.2f;
+    const juce::Colour col = juce::Colours::white;
+};
+
 ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     : juce::AudioProcessorEditor(&p), processor(p)
 {
@@ -124,6 +138,15 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
             dx = 0.6875f;
             dy = 0.6875f;
             elements.push_back(std::move(sl));
+        }
+        else if (id.endsWith("cv") || id.endsWith("input") || id.endsWith("output"))
+        {
+            auto led = std::make_unique<LedVu>();
+            background->addAndMakeVisible(*led);
+            led->setSize(3, 3);
+            dx = 0.5f;
+            dy = 0.5f;
+            elements.push_back(std::move(led));
         }
         else
         {
