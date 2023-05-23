@@ -8,6 +8,8 @@
 #include "led_vu.h"
 #include "sapphire_lnf.h"
 
+using juce::SliderParameterAttachment;
+
 namespace
 {
 
@@ -76,6 +78,8 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     tilt_in.vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("input_tilt_knob");
     tilt_in.slider = make_large_knob(x, y);
+    attachments.push_back(
+        std::make_unique<SliderParameterAttachment>(*(processor.inputTilt), *(tilt_in.slider)));
     // Add output tilt section.
     std::tie(x, y) = found.at("output_tilt_atten");
     tilt_out.atten = make_small_knob(x, y);
@@ -83,6 +87,8 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     tilt_out.vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("output_tilt_knob");
     tilt_out.slider = make_large_knob(x, y);
+    attachments.push_back(
+        std::make_unique<SliderParameterAttachment>(*(processor.outputTilt), *(tilt_out.slider)));
     // Add friction section.
     std::tie(x, y) = found.at("fric_atten");
     fric.atten = make_small_knob(x, y);
@@ -90,6 +96,8 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     fric.vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("fric_slider");
     fric.slider = make_slider(x, y);
+    attachments.push_back(
+        std::make_unique<SliderParameterAttachment>(*(processor.friction), *(fric.slider)));
     // Add stiffness section.
     std::tie(x, y) = found.at("stif_atten");
     stif.atten = make_small_knob(x, y);
@@ -97,6 +105,8 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     stif.vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("stif_slider");
     stif.slider = make_slider(x, y);
+    attachments.push_back(
+        std::make_unique<SliderParameterAttachment>(*(processor.stiffness), *(stif.slider)));
     // Add span section.
     std::tie(x, y) = found.at("span_atten");
     span.atten = make_small_knob(x, y);
@@ -104,6 +114,8 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     span.vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("span_slider");
     span.slider = make_slider(x, y);
+    attachments.push_back(
+        std::make_unique<SliderParameterAttachment>(*(processor.span), *(span.slider)));
     // Add curl section.
     std::tie(x, y) = found.at("curl_atten");
     curl.atten = make_small_knob(x, y);
@@ -111,6 +123,8 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     curl.vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("curl_slider");
     curl.slider = make_slider(x, y);
+    attachments.push_back(
+        std::make_unique<SliderParameterAttachment>(*(processor.curl), *(curl.slider)));
     // Add mass section.
     std::tie(x, y) = found.at("mass_atten");
     mass.atten = make_small_knob(x, y);
@@ -118,9 +132,13 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     mass.vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("mass_slider");
     mass.slider = make_slider(x, y);
+    attachments.push_back(
+        std::make_unique<SliderParameterAttachment>(*(processor.mass), *(mass.slider)));
     // Input drive.
     std::tie(x, y) = found.at("drive_knob");
     in_drive = make_large_knob(x, y);
+    attachments.push_back(
+        std::make_unique<SliderParameterAttachment>(*(processor.drive), *(in_drive)));
     std::tie(x, y) = found.at("audio_left_input");
     inl_vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("audio_right_input");
@@ -128,6 +146,8 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     // Output level.
     std::tie(x, y) = found.at("level_knob");
     out_level = make_large_knob(x, y);
+    attachments.push_back(
+        std::make_unique<SliderParameterAttachment>(*(processor.gain), *(out_level)));
     std::tie(x, y) = found.at("audio_left_output");
     outl_vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("audio_right_output");
@@ -137,32 +157,6 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     limiter_warning = make_led_vu(x, y);
     // Power toggle. FIXME: add.
     std::tie(x, y) = found.at("power_gate_input");
-
-#if 0
-      auto addKnob = [this](const std::string label, auto &paramRef) {
-        auto kn = std::make_unique<juce::Slider>();
-        kn->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-        kn->setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
-        addAndMakeVisible(*kn);
-
-        auto spa = std::make_unique<juce::SliderParameterAttachment>(paramRef, *kn);
-        attachments.push_back(std::move(spa));
-        knobs.push_back(std::move(kn));
-        auto lb = std::make_unique<juce::Label>(label, label);
-        lb->setColour(juce::Label::textColourId, juce::Colours::black);
-        lb->setJustificationType(juce::Justification::centred);
-        addAndMakeVisible(*lb);
-        labels.push_back(std::move(lb));
-    };
-    addKnob("Friction", *(processor.friction));
-    addKnob("Span", *(processor.span));
-    addKnob("Curl", *(processor.curl));
-    addKnob("Mass", *(processor.mass));
-    addKnob("Drive", *(processor.drive));
-    addKnob("Gain", *(processor.gain));
-    addKnob("InTilt", *(processor.inputTilt));
-    addKnob("OutTilt", *(processor.outputTilt));
-#endif
 
     resized();
 }

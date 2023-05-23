@@ -47,8 +47,15 @@ class ElastikaAudioProcessor : public juce::AudioProcessor
     void getStateInformation(juce::MemoryBlock &destData) override;
     void setStateInformation(const void *data, int sizeInBytes) override;
 
-    juce::AudioParameterFloat *friction, *span, *stiffness, *curl, *mass, *drive, *gain, *inputTilt,
-        *outputTilt;
+    juce::AudioParameterFloat *friction;
+    juce::AudioParameterFloat *span;
+    juce::AudioParameterFloat *stiffness;
+    juce::AudioParameterFloat *curl;
+    juce::AudioParameterFloat *mass;
+    juce::AudioParameterFloat *drive;
+    juce::AudioParameterFloat *gain;
+    juce::AudioParameterFloat *inputTilt;
+    juce::AudioParameterFloat *outputTilt;
 
   private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElastikaAudioProcessor)

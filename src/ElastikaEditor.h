@@ -51,9 +51,7 @@ class ElastikaEditor : public juce::AudioProcessorEditor
     std::unique_ptr<sapphire::LedVu> outl_vu;
     std::unique_ptr<sapphire::LedVu> outr_vu;
     std::unique_ptr<sapphire::LedVu> limiter_warning;
-    std::vector<std::unique_ptr<juce::Slider>> knobs;
     std::vector<std::unique_ptr<juce::SliderParameterAttachment>> attachments;
-    std::vector<std::unique_ptr<juce::Label>> labels;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElastikaEditor)
 };
