@@ -117,11 +117,43 @@ juce::AudioProcessorEditor *ElastikaAudioProcessor::createEditor()
     return new ElastikaEditor(*this);
 }
 
-void ElastikaAudioProcessor::getStateInformation(juce::MemoryBlock &destData) { jassertfalse; }
+void ElastikaAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
+{
+    juce::XmlElement root{"elastika"};
+    juce::XmlElement *params = root.createNewChildElement("parameters");
+    for (const juce::AudioProcessorParameter *p : getParameters())
+    {
+        juce::XmlElement *e = params->createNewChildElement(p->getName(1000));
+        // AudioProcessorParameter values are all floats in juce.
+        e->setAttribute("value", p->getValue());
+    }
+    copyXmlToBinary(root, destData);
+}
 
 void ElastikaAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
 {
-    jassertfalse;
+    std::unique_ptr<juce::XmlElement> root(getXmlFromBinary(data, sizeInBytes));
+    if (!root || !root->hasTagName("elastika"))
+    {
+        return;
+    }
+    juce::XmlElement *params = root->getChildByName("parameters");
+    if (!params)
+    {
+        return;
+    }
+
+    // Restore parameters.
+    for (juce::AudioProcessorParameter *p : getParameters())
+    {
+        juce::XmlElement *e = params->getChildByName(p->getName(1000));
+        if (e)
+        {
+            // AudioProcessorParameter values are all floats in juce.
+            float val = static_cast<float>(e->getDoubleAttribute("value", p->getValue()));
+            p->setValue(val);
+        }
+    }
 }
 
 //==============================================================================
