@@ -1,39 +1,29 @@
-/*
-  ==============================================================================
-
-    This file was auto-generated!
-
-    It contains the basic framework code for a JUCE plugin processor.
-
-  ==============================================================================
-*/
-
 #include "ElastikaProcessor.h"
 #include "ElastikaEditor.h"
 
-//==============================================================================
 ElastikaAudioProcessor::ElastikaAudioProcessor()
     : AudioProcessor(BusesProperties()
                          .withInput("Input", juce::AudioChannelSet::stereo(), true)
-                         .withOutput("Output", juce::AudioChannelSet::stereo(), true)
-                         )
+                         .withOutput("Output", juce::AudioChannelSet::stereo(), true))
 {
     engine = std::make_unique<Sapphire::ElastikaEngine>();
-    addParameter(friction = new juce::AudioParameterFloat({"friction", 1}, "Friction", 0.f, 1.f, 0.5f));
+    addParameter(friction =
+                     new juce::AudioParameterFloat({"friction", 1}, "Friction", 0.f, 1.f, 0.5f));
     addParameter(span = new juce::AudioParameterFloat({"span", 1}, "Span", 0.f, 1.f, 0.5f));
-    addParameter(stiffness = new juce::AudioParameterFloat({"stiffness", 1}, "Stiffness", 0.f, 1.f, 0.5f));
+    addParameter(stiffness =
+                     new juce::AudioParameterFloat({"stiffness", 1}, "Stiffness", 0.f, 1.f, 0.5f));
     addParameter(curl = new juce::AudioParameterFloat({"curl", 1}, "Curl", 0.f, 1.f, 0.0f));
     addParameter(mass = new juce::AudioParameterFloat({"mass", 1}, "Mass", 0.f, 1.f, 0.0f));
     addParameter(drive = new juce::AudioParameterFloat({"drive", 1}, "Drive", 0.f, 1.f, 1.0f));
     addParameter(gain = new juce::AudioParameterFloat({"gain", 1}, "Gain", 0.f, 1.f, 1.0f));
-    addParameter(inputTilt = new juce::AudioParameterFloat({"inputTilt", 1}, "InputTilt", 0.f, 1.f, 0.5f));
-    addParameter(outputTilt = new juce::AudioParameterFloat({"outputTilt", 1}, "OutputTilt", 0.f, 1.f, 0.5f));
-
+    addParameter(inputTilt =
+                     new juce::AudioParameterFloat({"inputTilt", 1}, "InputTilt", 0.f, 1.f, 0.5f));
+    addParameter(outputTilt = new juce::AudioParameterFloat({"outputTilt", 1}, "OutputTilt", 0.f,
+                                                            1.f, 0.5f));
 }
 
 ElastikaAudioProcessor::~ElastikaAudioProcessor() {}
 
-//==============================================================================
 const juce::String ElastikaAudioProcessor::getName() const { return JucePlugin_Name; }
 
 bool ElastikaAudioProcessor::acceptsMidi() const { return false; }
@@ -58,11 +48,10 @@ const juce::String ElastikaAudioProcessor::getProgramName(int index) { return "D
 
 void ElastikaAudioProcessor::changeProgramName(int index, const juce::String &newName) {}
 
-//==============================================================================
 void ElastikaAudioProcessor::prepareToPlay(double sr, int samplesPerBlock)
 {
-   // Set sample rate
-   sampleRate = sr;
+    // Set sample rate
+    sampleRate = sr;
 }
 
 void ElastikaAudioProcessor::releaseResources()
@@ -82,7 +71,7 @@ bool ElastikaAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) 
 }
 
 void ElastikaAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
-                                         juce::MidiBuffer &midiMessages)
+                                          juce::MidiBuffer &midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
 
@@ -109,7 +98,7 @@ void ElastikaAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     auto *isR = mainInput.getReadPointer(inChanR);
     auto *osL = mainOutput.getWritePointer(0);
     auto *osR = mainOutput.getWritePointer(1);
-    for (int s=0; s<buffer.getNumSamples(); ++s)
+    for (int s = 0; s < buffer.getNumSamples(); ++s)
     {
         float opl, opr;
         engine->process(sampleRate, isL[s], isR[s], opl, opr);
@@ -118,7 +107,6 @@ void ElastikaAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     }
 }
 
-//==============================================================================
 bool ElastikaAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
@@ -129,11 +117,7 @@ juce::AudioProcessorEditor *ElastikaAudioProcessor::createEditor()
     return new ElastikaEditor(*this);
 }
 
-//==============================================================================
-void ElastikaAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
-{
-    jassertfalse;
-}
+void ElastikaAudioProcessor::getStateInformation(juce::MemoryBlock &destData) { jassertfalse; }
 
 void ElastikaAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
 {

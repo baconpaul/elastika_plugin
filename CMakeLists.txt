@@ -39,14 +39,25 @@ endif()
 add_subdirectory(libs/JUCE)
 add_subdirectory(libs/clap-juce-extensions)
 
+file(GLOB ELASTIKA_RESOURCES_GLOB
+    ${CMAKE_SOURCE_DIR}/libs/sapphire/res/*.svg
+    ${CMAKE_SOURCE_DIR}/res/*.svg
+    )
+
+juce_add_binary_data(elastika-binary
+    NAMESPACE ElastikaBinary
+    HEADER_NAME ElastikaBinary.h
+    SOURCES ${ELASTIKA_RESOURCES_GLOB}
+    )
+
 juce_add_plugin(elastika-filter
     PRODUCT_NAME "Elastika"
-    COMPANY_NAME "Sapphire"  
+    COMPANY_NAME "Sapphire"
     BUNDLE_ID "org.cosinekitty.sapphire.elastika"
     PLUGIN_MANUFACTURER_CODE CSkT
-    PLUGIN_CODE ElsK 
+    PLUGIN_CODE ElsK
 
-    IS_SYNTH FALSE 
+    IS_SYNTH FALSE
 
     COPY_PLUGIN_AFTER_BUILD ${ELASTIKA_COPY_PLUGIN_AFTER_BUILD}
 
@@ -61,6 +72,8 @@ clap_juce_extensions_plugin(TARGET elastika-filter
 
 
 target_sources(elastika-filter PRIVATE
+  src/led_vu.cc
+  src/sapphire_lnf.cc
   src/ElastikaProcessor.cpp
   src/ElastikaEditor.cpp
 )
@@ -85,6 +98,6 @@ target_link_libraries(elastika-filter PRIVATE
     juce::juce_audio_utils
     juce::juce_audio_processors
     juce::juce_dsp
+    elastika-binary
     elastika-dsp
 )
-
