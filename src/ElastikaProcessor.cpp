@@ -1,7 +1,6 @@
 #include "ElastikaProcessor.h"
 #include "ElastikaEditor.h"
 
-//==============================================================================
 ElastikaAudioProcessor::ElastikaAudioProcessor()
     : AudioProcessor(BusesProperties()
                          .withInput("Input", juce::AudioChannelSet::stereo(), true)
@@ -25,7 +24,6 @@ ElastikaAudioProcessor::ElastikaAudioProcessor()
 
 ElastikaAudioProcessor::~ElastikaAudioProcessor() {}
 
-//==============================================================================
 const juce::String ElastikaAudioProcessor::getName() const { return JucePlugin_Name; }
 
 bool ElastikaAudioProcessor::acceptsMidi() const { return false; }
@@ -50,7 +48,6 @@ const juce::String ElastikaAudioProcessor::getProgramName(int index) { return "D
 
 void ElastikaAudioProcessor::changeProgramName(int index, const juce::String &newName) {}
 
-//==============================================================================
 void ElastikaAudioProcessor::prepareToPlay(double sr, int samplesPerBlock)
 {
     // Set sample rate
@@ -110,7 +107,6 @@ void ElastikaAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     }
 }
 
-//==============================================================================
 bool ElastikaAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
@@ -121,7 +117,6 @@ juce::AudioProcessorEditor *ElastikaAudioProcessor::createEditor()
     return new ElastikaEditor(*this);
 }
 
-//==============================================================================
 void ElastikaAudioProcessor::getStateInformation(juce::MemoryBlock &destData) { jassertfalse; }
 
 void ElastikaAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
