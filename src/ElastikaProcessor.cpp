@@ -54,6 +54,8 @@ void ElastikaAudioProcessor::prepareToPlay(double sr, int samplesPerBlock)
     // Set sample rate
     sampleRate = sr;
     perBlockRate = samplesPerBlock;
+    last_block_size_ = perBlockRate;
+    updateLagRates(perBlockRate);
 }
 
 void ElastikaAudioProcessor::releaseResources()
@@ -87,6 +89,11 @@ void ElastikaAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     auto mainOutput = getBusBuffer(buffer, false, 0);
 
     // Snap lag target values.
+    if (buffer.getNumSamples() != last_block_size_)
+    {
+        last_block_size_ = buffer.getNumSamples();
+        updateLagRates(buffer.getNumSamples());
+    }
     friction.updateLag();
     span.updateLag();
     curl.updateLag();
@@ -159,9 +166,9 @@ void ElastikaAudioProcessor::setStateInformation(const void *data, int sizeInByt
     }
 }
 
-void ElastikaAudioProcessor::updateLagRates()
+void ElastikaAudioProcessor::updateLagRates(int samplesPerBlock)
 {
-    const float rate = 1.f / static_cast<float>(perBlockRate);
+    const float rate = 1.f / static_cast<float>(samplesPerBlock);
     friction.lag.setRate(rate);
     span.lag.setRate(rate);
     stiffness.lag.setRate(rate);

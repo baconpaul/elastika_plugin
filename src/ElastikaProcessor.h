@@ -26,7 +26,7 @@ class ElastikaAudioProcessor : public juce::AudioProcessor
 
     std::unique_ptr<Sapphire::ElastikaEngine> engine;
     double sampleRate{0};
-    double perBlockRate{0};
+    int perBlockRate{0};
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -66,7 +66,9 @@ class ElastikaAudioProcessor : public juce::AudioProcessor
 
   private:
     void updateEngineParameters();
-    void updateLagRates();
+    void updateLagRates(int samplesPerBlock);
+
+    int last_block_size_;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElastikaAudioProcessor)
 };
