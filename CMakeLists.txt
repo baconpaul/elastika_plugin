@@ -79,6 +79,10 @@ target_sources(elastika-filter PRIVATE
   src/ElastikaEditor.cpp
 )
 
+target_include_directories(elastika-filter PRIVATE
+  libs
+)
+
 target_compile_definitions(elastika-filter PUBLIC
     JUCE_ALLOW_STATIC_NULL_VARIABLES=0
     JUCE_STRICT_REFCOUNTEDPOINTER=1
