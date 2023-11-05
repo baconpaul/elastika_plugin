@@ -7,19 +7,20 @@ ElastikaAudioProcessor::ElastikaAudioProcessor()
                          .withOutput("Output", juce::AudioChannelSet::stereo(), true))
 {
     engine = std::make_unique<Sapphire::ElastikaEngine>();
-    addParameter(friction =
+    addParameter(friction.param =
                      new juce::AudioParameterFloat({"friction", 1}, "Friction", 0.f, 1.f, 0.5f));
-    addParameter(span = new juce::AudioParameterFloat({"span", 1}, "Span", 0.f, 1.f, 0.5f));
-    addParameter(stiffness =
+    addParameter(span.param = new juce::AudioParameterFloat({"span", 1}, "Span", 0.f, 1.f, 0.5f));
+    addParameter(stiffness.param =
                      new juce::AudioParameterFloat({"stiffness", 1}, "Stiffness", 0.f, 1.f, 0.5f));
-    addParameter(curl = new juce::AudioParameterFloat({"curl", 1}, "Curl", 0.f, 1.f, 0.0f));
-    addParameter(mass = new juce::AudioParameterFloat({"mass", 1}, "Mass", 0.f, 1.f, 0.0f));
-    addParameter(drive = new juce::AudioParameterFloat({"drive", 1}, "Drive", 0.f, 1.f, 1.0f));
-    addParameter(gain = new juce::AudioParameterFloat({"gain", 1}, "Gain", 0.f, 1.f, 1.0f));
-    addParameter(inputTilt =
+    addParameter(curl.param = new juce::AudioParameterFloat({"curl", 1}, "Curl", 0.f, 1.f, 0.0f));
+    addParameter(mass.param = new juce::AudioParameterFloat({"mass", 1}, "Mass", 0.f, 1.f, 0.0f));
+    addParameter(drive.param =
+                     new juce::AudioParameterFloat({"drive", 1}, "Drive", 0.f, 1.f, 1.0f));
+    addParameter(gain.param = new juce::AudioParameterFloat({"gain", 1}, "Gain", 0.f, 1.f, 1.0f));
+    addParameter(inputTilt.param =
                      new juce::AudioParameterFloat({"inputTilt", 1}, "InputTilt", 0.f, 1.f, 0.5f));
-    addParameter(outputTilt = new juce::AudioParameterFloat({"outputTilt", 1}, "OutputTilt", 0.f,
-                                                            1.f, 0.5f));
+    addParameter(outputTilt.param = new juce::AudioParameterFloat({"outputTilt", 1}, "OutputTilt",
+                                                                  0.f, 1.f, 0.5f));
 }
 
 ElastikaAudioProcessor::~ElastikaAudioProcessor() {}
@@ -52,6 +53,7 @@ void ElastikaAudioProcessor::prepareToPlay(double sr, int samplesPerBlock)
 {
     // Set sample rate
     sampleRate = sr;
+    perBlockRate = samplesPerBlock;
 }
 
 void ElastikaAudioProcessor::releaseResources()
@@ -84,15 +86,15 @@ void ElastikaAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 
     auto mainOutput = getBusBuffer(buffer, false, 0);
 
-    // FIXME - obviously use a smoothing strategy here but for now
-    engine->setFriction(*friction);
-    engine->setSpan(*span);
-    engine->setCurl(*curl);
-    engine->setMass(*mass);
-    engine->setDrive(*drive);
-    engine->setGain(*gain);
-    engine->setInputTilt(*inputTilt);
-    engine->setOutputTilt(*outputTilt);
+    // Snap lag target values.
+    friction.updateLag();
+    span.updateLag();
+    curl.updateLag();
+    mass.updateLag();
+    drive.updateLag();
+    gain.updateLag();
+    inputTilt.updateLag();
+    outputTilt.updateLag();
 
     auto *isL = mainInput.getReadPointer(inChanL);
     auto *isR = mainInput.getReadPointer(inChanR);
@@ -100,6 +102,7 @@ void ElastikaAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     auto *osR = mainOutput.getWritePointer(1);
     for (int s = 0; s < buffer.getNumSamples(); ++s)
     {
+        updateEngineParameters();
         float opl, opr;
         engine->process(sampleRate, isL[s], isR[s], opl, opr);
         osL[s] = opl;
@@ -153,6 +156,70 @@ void ElastikaAudioProcessor::setStateInformation(const void *data, int sizeInByt
             float val = static_cast<float>(e->getDoubleAttribute("value", p->getValue()));
             p->setValue(val);
         }
+    }
+}
+
+void ElastikaAudioProcessor::updateLagRates()
+{
+    const float rate = 1.f / static_cast<float>(perBlockRate);
+    friction.lag.setRate(rate);
+    span.lag.setRate(rate);
+    stiffness.lag.setRate(rate);
+    curl.lag.setRate(rate);
+    mass.lag.setRate(rate);
+    drive.lag.setRate(rate);
+    gain.lag.setRate(rate);
+    inputTilt.lag.setRate(rate);
+    outputTilt.lag.setRate(rate);
+}
+
+void ElastikaAudioProcessor::updateEngineParameters()
+{
+    // Possibly update engine parameters, if they're meaningfully different.
+    if (juce::approximatelyEqual(friction.last_value, friction.lag.target_v))
+    {
+        friction.lag.process();
+        engine->setFriction(friction.lag.v);
+    }
+    if (juce::approximatelyEqual(span.last_value, span.lag.target_v))
+    {
+        span.lag.process();
+        engine->setSpan(span.lag.v);
+    }
+    if (juce::approximatelyEqual(stiffness.last_value, stiffness.lag.target_v))
+    {
+        stiffness.lag.process();
+        engine->setStiffness(stiffness.lag.v);
+    }
+    if (juce::approximatelyEqual(curl.last_value, curl.lag.target_v))
+    {
+        curl.lag.process();
+        engine->setCurl(curl.lag.v);
+    }
+    if (juce::approximatelyEqual(mass.last_value, mass.lag.target_v))
+    {
+        mass.lag.process();
+        engine->setMass(mass.lag.v);
+    }
+    if (juce::approximatelyEqual(drive.last_value, drive.lag.target_v))
+    {
+        drive.lag.process();
+        engine->setDrive(drive.lag.v);
+    }
+    if (juce::approximatelyEqual(gain.last_value, gain.lag.target_v))
+    {
+        gain.lag.process();
+        engine->setGain(gain.lag.v);
+    }
+    if (juce::approximatelyEqual(inputTilt.last_value, inputTilt.lag.target_v))
+    {
+        inputTilt.lag.process();
+        engine->setInputTilt(inputTilt.lag.v);
+    }
+    if (juce::approximatelyEqual(outputTilt.last_value, outputTilt.lag.target_v))
+    {
+        outputTilt.lag.process();
+        engine->setOutputTilt(outputTilt.lag.v);
     }
 }
 
