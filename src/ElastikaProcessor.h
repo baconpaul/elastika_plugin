@@ -66,9 +66,7 @@ class ElastikaAudioProcessor : public juce::AudioProcessor
 
   private:
     void updateEngineParameters();
-    void updateLagRates(int samplesPerBlock);
-
-    int last_block_size_;
+    void updateLagRates();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElastikaAudioProcessor)
 };

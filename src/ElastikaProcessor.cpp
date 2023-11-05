@@ -54,8 +54,7 @@ void ElastikaAudioProcessor::prepareToPlay(double sr, int samplesPerBlock)
     // Set sample rate
     sampleRate = sr;
     perBlockRate = samplesPerBlock;
-    last_block_size_ = perBlockRate;
-    updateLagRates(perBlockRate);
+    updateLagRates();
 }
 
 void ElastikaAudioProcessor::releaseResources()
@@ -89,11 +88,6 @@ void ElastikaAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     auto mainOutput = getBusBuffer(buffer, false, 0);
 
     // Snap lag target values.
-    if (buffer.getNumSamples() != last_block_size_)
-    {
-        last_block_size_ = buffer.getNumSamples();
-        updateLagRates(buffer.getNumSamples());
-    }
     friction.updateLag();
     span.updateLag();
     curl.updateLag();
@@ -166,9 +160,9 @@ void ElastikaAudioProcessor::setStateInformation(const void *data, int sizeInByt
     }
 }
 
-void ElastikaAudioProcessor::updateLagRates(int samplesPerBlock)
+void ElastikaAudioProcessor::updateLagRates()
 {
-    const float rate = 1.f / static_cast<float>(samplesPerBlock);
+    const float rate = 1.f / static_cast<float>(perBlockRate);
     friction.lag.setRate(rate);
     span.lag.setRate(rate);
     stiffness.lag.setRate(rate);
@@ -182,52 +176,24 @@ void ElastikaAudioProcessor::updateLagRates(int samplesPerBlock)
 
 void ElastikaAudioProcessor::updateEngineParameters()
 {
-    // Possibly update engine parameters, if they're meaningfully different.
-    if (juce::approximatelyEqual(friction.last_value, friction.lag.target_v))
-    {
-        friction.lag.process();
-        engine->setFriction(friction.lag.v);
-    }
-    if (juce::approximatelyEqual(span.last_value, span.lag.target_v))
-    {
-        span.lag.process();
-        engine->setSpan(span.lag.v);
-    }
-    if (juce::approximatelyEqual(stiffness.last_value, stiffness.lag.target_v))
-    {
-        stiffness.lag.process();
-        engine->setStiffness(stiffness.lag.v);
-    }
-    if (juce::approximatelyEqual(curl.last_value, curl.lag.target_v))
-    {
-        curl.lag.process();
-        engine->setCurl(curl.lag.v);
-    }
-    if (juce::approximatelyEqual(mass.last_value, mass.lag.target_v))
-    {
-        mass.lag.process();
-        engine->setMass(mass.lag.v);
-    }
-    if (juce::approximatelyEqual(drive.last_value, drive.lag.target_v))
-    {
-        drive.lag.process();
-        engine->setDrive(drive.lag.v);
-    }
-    if (juce::approximatelyEqual(gain.last_value, gain.lag.target_v))
-    {
-        gain.lag.process();
-        engine->setGain(gain.lag.v);
-    }
-    if (juce::approximatelyEqual(inputTilt.last_value, inputTilt.lag.target_v))
-    {
-        inputTilt.lag.process();
-        engine->setInputTilt(inputTilt.lag.v);
-    }
-    if (juce::approximatelyEqual(outputTilt.last_value, outputTilt.lag.target_v))
-    {
-        outputTilt.lag.process();
-        engine->setOutputTilt(outputTilt.lag.v);
-    }
+    friction.lag.process();
+    span.lag.process();
+    stiffness.lag.process();
+    curl.lag.process();
+    mass.lag.process();
+    drive.lag.process();
+    gain.lag.process();
+    inputTilt.lag.process();
+    outputTilt.lag.process();
+    engine->setFriction(friction.lag.v);
+    engine->setSpan(span.lag.v);
+    engine->setStiffness(stiffness.lag.v);
+    engine->setCurl(curl.lag.v);
+    engine->setMass(mass.lag.v);
+    engine->setDrive(drive.lag.v);
+    engine->setGain(gain.lag.v);
+    engine->setInputTilt(inputTilt.lag.v);
+    engine->setOutputTilt(outputTilt.lag.v);
 }
 
 //==============================================================================
