@@ -78,8 +78,8 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     tilt_in.vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("input_tilt_knob");
     tilt_in.slider = make_large_knob(x, y);
-    attachments.push_back(
-        std::make_unique<SliderParameterAttachment>(*(processor.inputTilt), *(tilt_in.slider)));
+    attachments.push_back(std::make_unique<SliderParameterAttachment>(*(processor.inputTilt.param),
+                                                                      *(tilt_in.slider)));
     // Add output tilt section.
     std::tie(x, y) = found.at("output_tilt_atten");
     tilt_out.atten = make_small_knob(x, y);
@@ -87,8 +87,8 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     tilt_out.vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("output_tilt_knob");
     tilt_out.slider = make_large_knob(x, y);
-    attachments.push_back(
-        std::make_unique<SliderParameterAttachment>(*(processor.outputTilt), *(tilt_out.slider)));
+    attachments.push_back(std::make_unique<SliderParameterAttachment>(*(processor.outputTilt.param),
+                                                                      *(tilt_out.slider)));
     // Add friction section.
     std::tie(x, y) = found.at("fric_atten");
     fric.atten = make_small_knob(x, y);
@@ -97,7 +97,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("fric_slider");
     fric.slider = make_slider(x, y);
     attachments.push_back(
-        std::make_unique<SliderParameterAttachment>(*(processor.friction), *(fric.slider)));
+        std::make_unique<SliderParameterAttachment>(*(processor.friction.param), *(fric.slider)));
     // Add stiffness section.
     std::tie(x, y) = found.at("stif_atten");
     stif.atten = make_small_knob(x, y);
@@ -106,7 +106,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("stif_slider");
     stif.slider = make_slider(x, y);
     attachments.push_back(
-        std::make_unique<SliderParameterAttachment>(*(processor.stiffness), *(stif.slider)));
+        std::make_unique<SliderParameterAttachment>(*(processor.stiffness.param), *(stif.slider)));
     // Add span section.
     std::tie(x, y) = found.at("span_atten");
     span.atten = make_small_knob(x, y);
@@ -115,7 +115,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("span_slider");
     span.slider = make_slider(x, y);
     attachments.push_back(
-        std::make_unique<SliderParameterAttachment>(*(processor.span), *(span.slider)));
+        std::make_unique<SliderParameterAttachment>(*(processor.span.param), *(span.slider)));
     // Add curl section.
     std::tie(x, y) = found.at("curl_atten");
     curl.atten = make_small_knob(x, y);
@@ -124,7 +124,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("curl_slider");
     curl.slider = make_slider(x, y);
     attachments.push_back(
-        std::make_unique<SliderParameterAttachment>(*(processor.curl), *(curl.slider)));
+        std::make_unique<SliderParameterAttachment>(*(processor.curl.param), *(curl.slider)));
     // Add mass section.
     std::tie(x, y) = found.at("mass_atten");
     mass.atten = make_small_knob(x, y);
@@ -133,12 +133,12 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("mass_slider");
     mass.slider = make_slider(x, y);
     attachments.push_back(
-        std::make_unique<SliderParameterAttachment>(*(processor.mass), *(mass.slider)));
+        std::make_unique<SliderParameterAttachment>(*(processor.mass.param), *(mass.slider)));
     // Input drive.
     std::tie(x, y) = found.at("drive_knob");
     in_drive = make_large_knob(x, y);
     attachments.push_back(
-        std::make_unique<SliderParameterAttachment>(*(processor.drive), *(in_drive)));
+        std::make_unique<SliderParameterAttachment>(*(processor.drive.param), *(in_drive)));
     std::tie(x, y) = found.at("audio_left_input");
     inl_vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("audio_right_input");
@@ -147,7 +147,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("level_knob");
     out_level = make_large_knob(x, y);
     attachments.push_back(
-        std::make_unique<SliderParameterAttachment>(*(processor.gain), *(out_level)));
+        std::make_unique<SliderParameterAttachment>(*(processor.gain.param), *(out_level)));
     std::tie(x, y) = found.at("audio_left_output");
     outl_vu = make_led_vu(x, y);
     std::tie(x, y) = found.at("audio_right_output");

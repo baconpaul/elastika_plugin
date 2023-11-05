@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "Build for 10.15")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(elastika_plugin VERSION 0.9.0 LANGUAGES CXX)
 
@@ -76,6 +77,10 @@ target_sources(elastika-filter PRIVATE
   src/sapphire_lnf.cc
   src/ElastikaProcessor.cpp
   src/ElastikaEditor.cpp
+)
+
+target_include_directories(elastika-filter PRIVATE
+  libs
 )
 
 target_compile_definitions(elastika-filter PUBLIC
