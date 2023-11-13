@@ -12,11 +12,11 @@ ElastikaAudioProcessor::ElastikaAudioProcessor()
     addParameter(span.param = new juce::AudioParameterFloat({"span", 1}, "Span", 0.f, 1.f, 0.5f));
     addParameter(stiffness.param =
                      new juce::AudioParameterFloat({"stiffness", 1}, "Stiffness", 0.f, 1.f, 0.5f));
-    addParameter(curl.param = new juce::AudioParameterFloat({"curl", 1}, "Curl", 0.f, 1.f, 0.0f));
-    addParameter(mass.param = new juce::AudioParameterFloat({"mass", 1}, "Mass", 0.f, 1.f, 0.0f));
+    addParameter(curl.param = new juce::AudioParameterFloat({"curl", 1}, "Curl", -1.f, 1.f, 0.0f));
+    addParameter(mass.param = new juce::AudioParameterFloat({"mass", 1}, "Mass", -1.f, 1.f, 0.0f));
     addParameter(drive.param =
-                     new juce::AudioParameterFloat({"drive", 1}, "Drive", 0.f, 1.f, 1.0f));
-    addParameter(gain.param = new juce::AudioParameterFloat({"gain", 1}, "Gain", 0.f, 1.f, 1.0f));
+                     new juce::AudioParameterFloat({"drive", 1}, "Drive", 0.f, 2.f, 1.0f));
+    addParameter(gain.param = new juce::AudioParameterFloat({"gain", 1}, "Gain", 0.f, 2.f, 1.0f));
     addParameter(inputTilt.param =
                      new juce::AudioParameterFloat({"inputTilt", 1}, "InputTilt", 0.f, 1.f, 0.5f));
     addParameter(outputTilt.param = new juce::AudioParameterFloat({"outputTilt", 1}, "OutputTilt",
