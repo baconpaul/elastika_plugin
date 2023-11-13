@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include <memory>
 #include <vector>
 
@@ -31,8 +30,7 @@ class ElastikaEditor : public juce::AudioProcessorEditor
     // Convenience functions for constructing controls.
     std::unique_ptr<juce::Slider> make_large_knob(float cx, float cy);
     std::unique_ptr<juce::Slider> make_small_knob(float cx, float cy);
-    std::unique_ptr<sapphire::LedVu> make_led_vu(float cx, float cy,
-                                                 const std::atomic<float> &param_val);
+    std::unique_ptr<sapphire::LedVu> make_led_vu(float cx, float cy);
     std::unique_ptr<juce::Slider> make_slider(float cx, float cy);
 
     ElastikaAudioProcessor &processor;

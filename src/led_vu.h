@@ -1,7 +1,5 @@
 #pragma once
 
-#include <atomic>
-
 #include "juce_gui_basics/juce_gui_basics.h"
 
 namespace sapphire
@@ -10,8 +8,7 @@ namespace sapphire
 class LedVu : public juce::Component
 {
   public:
-    // Constructor argument is the block maximum of the parameter we're watching.
-    explicit LedVu(const std::atomic<float>& block_max);
+    LedVu();
 
     void paint(juce::Graphics &g) override;
 
@@ -25,8 +22,6 @@ class LedVu : public juce::Component
 
     juce::ColourGradient led_picker_;
     juce::ColourGradient led_shadow_picker_;
-
-    const std::atomic<float>& block_max_;
 };
 
 } // namespace sapphire

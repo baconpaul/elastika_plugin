@@ -3,7 +3,7 @@
 namespace sapphire
 {
 
-LedVu::LedVu(const std::atomic<float> &block_max) : block_max_(block_max)
+LedVu::LedVu()
 {
     setPaintingIsUnclipped(true);
 
@@ -22,7 +22,8 @@ void LedVu::paint(juce::Graphics &g)
     juce::Path p;
     p.addEllipse(0, 0, diam, diam);
 
-    const double point = static_cast<double>(block_max_.load(std::memory_order_relaxed));
+    // FIXME
+    const double point = 0.92;
 
     // To determine the color to be used, construct a gradient and pull from
     // along it.
