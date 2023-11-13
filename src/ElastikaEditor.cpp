@@ -75,7 +75,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("input_tilt_atten");
     tilt_in.atten = make_small_knob(x, y);
     std::tie(x, y) = found.at("input_tilt_cv");
-    tilt_in.vu = make_led_vu(x, y);
+    tilt_in.vu = make_led_vu(x, y, processor.inputTilt.block_max);
     std::tie(x, y) = found.at("input_tilt_knob");
     tilt_in.slider = make_large_knob(x, y);
     attachments.push_back(std::make_unique<SliderParameterAttachment>(*(processor.inputTilt.param),
@@ -84,7 +84,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("output_tilt_atten");
     tilt_out.atten = make_small_knob(x, y);
     std::tie(x, y) = found.at("output_tilt_cv");
-    tilt_out.vu = make_led_vu(x, y);
+    tilt_out.vu = make_led_vu(x, y, processor.outputTilt.block_max);
     std::tie(x, y) = found.at("output_tilt_knob");
     tilt_out.slider = make_large_knob(x, y);
     attachments.push_back(std::make_unique<SliderParameterAttachment>(*(processor.outputTilt.param),
@@ -93,7 +93,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("fric_atten");
     fric.atten = make_small_knob(x, y);
     std::tie(x, y) = found.at("fric_cv");
-    fric.vu = make_led_vu(x, y);
+    fric.vu = make_led_vu(x, y, processor.friction.block_max);
     std::tie(x, y) = found.at("fric_slider");
     fric.slider = make_slider(x, y);
     attachments.push_back(
@@ -102,7 +102,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("stif_atten");
     stif.atten = make_small_knob(x, y);
     std::tie(x, y) = found.at("stif_cv");
-    stif.vu = make_led_vu(x, y);
+    stif.vu = make_led_vu(x, y, processor.stiffness.block_max);
     std::tie(x, y) = found.at("stif_slider");
     stif.slider = make_slider(x, y);
     attachments.push_back(
@@ -111,7 +111,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("span_atten");
     span.atten = make_small_knob(x, y);
     std::tie(x, y) = found.at("span_cv");
-    span.vu = make_led_vu(x, y);
+    span.vu = make_led_vu(x, y, processor.span.block_max);
     std::tie(x, y) = found.at("span_slider");
     span.slider = make_slider(x, y);
     attachments.push_back(
@@ -120,7 +120,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("curl_atten");
     curl.atten = make_small_knob(x, y);
     std::tie(x, y) = found.at("curl_cv");
-    curl.vu = make_led_vu(x, y);
+    curl.vu = make_led_vu(x, y, processor.curl.block_max);
     std::tie(x, y) = found.at("curl_slider");
     curl.slider = make_slider(x, y);
     attachments.push_back(
@@ -129,7 +129,7 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     std::tie(x, y) = found.at("mass_atten");
     mass.atten = make_small_knob(x, y);
     std::tie(x, y) = found.at("mass_cv");
-    mass.vu = make_led_vu(x, y);
+    mass.vu = make_led_vu(x, y, processor.mass.block_max);
     std::tie(x, y) = found.at("mass_slider");
     mass.slider = make_slider(x, y);
     attachments.push_back(
@@ -140,21 +140,21 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     attachments.push_back(
         std::make_unique<SliderParameterAttachment>(*(processor.drive.param), *(in_drive)));
     std::tie(x, y) = found.at("audio_left_input");
-    inl_vu = make_led_vu(x, y);
+    inl_vu = make_led_vu(x, y, processor.drive.block_max);  // fixme
     std::tie(x, y) = found.at("audio_right_input");
-    inr_vu = make_led_vu(x, y);
+    inr_vu = make_led_vu(x, y, processor.drive.block_max);  // fixme
     // Output level.
     std::tie(x, y) = found.at("level_knob");
     out_level = make_large_knob(x, y);
     attachments.push_back(
         std::make_unique<SliderParameterAttachment>(*(processor.gain.param), *(out_level)));
     std::tie(x, y) = found.at("audio_left_output");
-    outl_vu = make_led_vu(x, y);
+    outl_vu = make_led_vu(x, y, processor.gain.block_max);  // fixme
     std::tie(x, y) = found.at("audio_right_output");
-    outr_vu = make_led_vu(x, y);
+    outr_vu = make_led_vu(x, y, processor.gain.block_max);  // fixme
     // Limiter warning light.
     std::tie(x, y) = found.at("power_toggle");
-    limiter_warning = make_led_vu(x, y);
+    limiter_warning = make_led_vu(x, y, processor.gain.block_max);  // fixme
     // Power toggle. FIXME: add.
     std::tie(x, y) = found.at("power_gate_input");
 
@@ -203,11 +203,11 @@ std::unique_ptr<juce::Slider> ElastikaEditor::make_small_knob(float cx, float cy
     return kn;
 }
 
-std::unique_ptr<sapphire::LedVu> ElastikaEditor::make_led_vu(float cx, float cy)
+std::unique_ptr<sapphire::LedVu> ElastikaEditor::make_led_vu(float cx, float cy, const std::atomic<float>& param_val)
 {
     static constexpr float dx = 0.5f;
     static constexpr float dy = 0.5f;
-    auto led = std::make_unique<sapphire::LedVu>();
+    auto led = std::make_unique<sapphire::LedVu>(param_val);
     background->addAndMakeVisible(*led);
     led->setSize(3, 3);
     set_control_position(*led, cx, cy, dx, dy);

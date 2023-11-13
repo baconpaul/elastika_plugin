@@ -1,5 +1,8 @@
 #pragma once
 
+#include <atomic>
+#include <limits>
+
 #include "elastika_engine.hpp"
 #include "juce_audio_processors/juce_audio_processors.h"
 #include <Lag.h>
@@ -10,6 +13,16 @@ struct AudioParameter
     juce::AudioParameterFloat *param;
     sst::basic_blocks::dsp::SurgeLag<float> lag;
     float last_value;
+    float max = std::numeric_limits<float>::min();
+
+    // Set separately after the block finishes processing, so we don't have
+    // to constantly update an atomic on a per-sample basis.
+    std::atomic<float> block_max;
+    void updateBlockMax()
+    {
+        block_max.store(max, std::memory_order_relaxed);
+        max = std::numeric_limits<float>::min();
+    }
 
     void updateLag()
     {

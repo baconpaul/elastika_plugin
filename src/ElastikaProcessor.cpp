@@ -109,6 +109,16 @@ void ElastikaAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         osL[s] = opl;
         osR[s] = opr;
     }
+
+    // Update maxes for the LED VUs.
+    friction.updateBlockMax();
+    span.updateBlockMax();
+    curl.updateBlockMax();
+    mass.updateBlockMax();
+    drive.updateBlockMax();
+    gain.updateBlockMax();
+    inputTilt.updateBlockMax();
+    outputTilt.updateBlockMax();
 }
 
 bool ElastikaAudioProcessor::hasEditor() const
@@ -185,6 +195,15 @@ void ElastikaAudioProcessor::updateEngineParameters()
     gain.lag.process();
     inputTilt.lag.process();
     outputTilt.lag.process();
+    friction.max = std::max(friction.max, friction.lag.v);
+    span.max = std::max(span.max, span.lag.v);
+    stiffness.max = std::max(stiffness.max, stiffness.lag.v);
+    curl.max = std::max(curl.max, curl.lag.v);
+    mass.max = std::max(mass.max, mass.lag.v);
+    drive.max = std::max(drive.max, drive.lag.v);
+    gain.max = std::max(gain.max, gain.lag.v);
+    inputTilt.max = std::max(inputTilt.max, inputTilt.lag.v);
+    outputTilt.max = std::max(outputTilt.max, outputTilt.lag.v);
     engine->setFriction(friction.lag.v);
     engine->setSpan(span.lag.v);
     engine->setStiffness(stiffness.lag.v);
