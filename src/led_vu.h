@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "juce_gui_basics/juce_gui_basics.h"
 
 namespace sapphire
@@ -8,7 +10,7 @@ namespace sapphire
 class LedVu : public juce::Component
 {
   public:
-    LedVu();
+    LedVu(const std::atomic<float>& source);
 
     void paint(juce::Graphics &g) override;
 
@@ -18,10 +20,11 @@ class LedVu : public juce::Component
     const juce::Colour good_shadow_ = juce::Colours::lightgreen;
     const juce::Colour limit_col_ = juce::Colours::red;
     const juce::Colour limit_shadow_ = juce::Colours::mediumvioletred;
+    const juce::Colour warning_col_ = juce::Colours::yellow;
+    const juce::Colour warning_shadow_ = juce::Colours::lightyellow;
     const juce::Colour outline_col_ = juce::Colours::black;
 
-    juce::ColourGradient led_picker_;
-    juce::ColourGradient led_shadow_picker_;
+    const std::atomic<float>& source_;
 };
 
 } // namespace sapphire

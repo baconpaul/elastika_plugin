@@ -3,16 +3,10 @@
 namespace sapphire
 {
 
-LedVu::LedVu()
+LedVu::LedVu(const std::atomic<float>& source)
+    : source_(source)
 {
     setPaintingIsUnclipped(true);
-
-    led_picker_.addColour(0, good_col_);
-    led_picker_.addColour(0.8, good_col_);
-    led_picker_.addColour(1, limit_col_);
-    led_shadow_picker_.addColour(0, good_shadow_);
-    led_shadow_picker_.addColour(0.8, good_shadow_);
-    led_shadow_picker_.addColour(1, limit_shadow_);
 }
 
 void LedVu::paint(juce::Graphics &g)
@@ -22,15 +16,20 @@ void LedVu::paint(juce::Graphics &g)
     juce::Path p;
     p.addEllipse(0, 0, diam, diam);
 
-    // FIXME
-    const double point = 0.92;
+    const float point = source_.load(std::memory_order_relaxed);
 
-    // To determine the color to be used, construct a gradient and pull from
-    // along it.
     juce::Colour shadow_color;
     juce::Colour led_color;
-    shadow_color = led_shadow_picker_.getColourAtPosition(point);
-    led_color = led_picker_.getColourAtPosition(point);
+    if (point < 0.9) {
+        led_color = good_col_;
+        shadow_color = good_shadow_;
+    } else if (point < 1) {
+        led_color = warning_col_;
+        shadow_color = warning_shadow_;
+    } else {
+        led_color = limit_col_;
+        shadow_color = limit_shadow_;
+    }
 
     juce::DropShadow(shadow_color.withAlpha(0.7f), 1, {}).drawForPath(g, p);
 
