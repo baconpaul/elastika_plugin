@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "elastika_engine.hpp"
 #include "juce_audio_processors/juce_audio_processors.h"
 #include <Lag.h>
@@ -64,7 +66,15 @@ class ElastikaAudioProcessor : public juce::AudioProcessor
     AudioParameter inputTilt;
     AudioParameter outputTilt;
 
+    std::atomic<float> internal_distortion;
+    std::atomic<float> inl_level;
+    std::atomic<float> inr_level;
+    std::atomic<float> outl_level;
+    std::atomic<float> outr_level;
+
   private:
+    static constexpr const float decay_rate = 0.707;
+
     void updateEngineParameters();
     void updateLagRates();
 
