@@ -14,7 +14,7 @@
 struct PhysicsControl
 {
     std::unique_ptr<juce::Slider> atten;
-    std::unique_ptr<sapphire::LedVu> vu;
+    std::unique_ptr<sapphire::LedVu> vu; // Unused right now.
     std::unique_ptr<juce::Slider> slider;
 };
 
@@ -30,7 +30,8 @@ class ElastikaEditor : public juce::AudioProcessorEditor
     // Convenience functions for constructing controls.
     std::unique_ptr<juce::Slider> make_large_knob(float cx, float cy);
     std::unique_ptr<juce::Slider> make_small_knob(float cx, float cy);
-    std::unique_ptr<sapphire::LedVu> make_led_vu(float cx, float cy);
+    std::unique_ptr<sapphire::LedVu> make_led_vu(float cx, float cy,
+                                                 const std::atomic<float> &source);
     std::unique_ptr<juce::Slider> make_slider(float cx, float cy);
 
     ElastikaAudioProcessor &processor;

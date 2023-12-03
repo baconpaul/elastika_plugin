@@ -1,5 +1,19 @@
+#include <algorithm>
+#include <cmath>
+
 #include "ElastikaProcessor.h"
 #include "ElastikaEditor.h"
+
+namespace
+{
+
+inline float rms_to_intensity(float rms)
+{
+    rms = std::clamp(rms, 0.f, 1.f);
+    return std::pow(rms, 3.f);
+}
+
+} // namespace
 
 ElastikaAudioProcessor::ElastikaAudioProcessor()
     : AudioProcessor(BusesProperties()
@@ -12,11 +26,11 @@ ElastikaAudioProcessor::ElastikaAudioProcessor()
     addParameter(span.param = new juce::AudioParameterFloat({"span", 1}, "Span", 0.f, 1.f, 0.5f));
     addParameter(stiffness.param =
                      new juce::AudioParameterFloat({"stiffness", 1}, "Stiffness", 0.f, 1.f, 0.5f));
-    addParameter(curl.param = new juce::AudioParameterFloat({"curl", 1}, "Curl", 0.f, 1.f, 0.0f));
-    addParameter(mass.param = new juce::AudioParameterFloat({"mass", 1}, "Mass", 0.f, 1.f, 0.0f));
+    addParameter(curl.param = new juce::AudioParameterFloat({"curl", 1}, "Curl", -1.f, 1.f, 0.0f));
+    addParameter(mass.param = new juce::AudioParameterFloat({"mass", 1}, "Mass", -1.f, 1.f, 0.0f));
     addParameter(drive.param =
-                     new juce::AudioParameterFloat({"drive", 1}, "Drive", 0.f, 1.f, 1.0f));
-    addParameter(gain.param = new juce::AudioParameterFloat({"gain", 1}, "Gain", 0.f, 1.f, 1.0f));
+                     new juce::AudioParameterFloat({"drive", 1}, "Drive", 0.f, 2.f, 1.0f));
+    addParameter(gain.param = new juce::AudioParameterFloat({"gain", 1}, "Gain", 0.f, 2.f, 1.0f));
     addParameter(inputTilt.param =
                      new juce::AudioParameterFloat({"inputTilt", 1}, "InputTilt", 0.f, 1.f, 0.5f));
     addParameter(outputTilt.param = new juce::AudioParameterFloat({"outputTilt", 1}, "OutputTilt",
@@ -109,6 +123,29 @@ void ElastikaAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         osL[s] = opl;
         osR[s] = opr;
     }
+
+    // Update data for the warning lights.
+    float db = 20.f * std::log10(1.f + engine->getAgcDistortion());
+    db = std::clamp(db / 24.f, 0.f, 1.f);
+    db = std::max(internal_distortion.load(std::memory_order_relaxed) * decay_rate, db);
+    internal_distortion.store(db, std::memory_order_relaxed);
+
+    float rms_in_l = mainInput.getRMSLevel(inChanL, 0, buffer.getNumSamples());
+    float rms_in_r = mainInput.getRMSLevel(inChanR, 0, buffer.getNumSamples());
+    float rms_out_l = mainOutput.getRMSLevel(0, 0, buffer.getNumSamples());
+    float rms_out_r = mainOutput.getRMSLevel(1, 0, buffer.getNumSamples());
+    rms_in_l = std::max(inl_level.load(std::memory_order_relaxed) * decay_rate,
+                        rms_to_intensity(rms_in_l));
+    rms_in_r = std::max(inr_level.load(std::memory_order_relaxed) * decay_rate,
+                        rms_to_intensity(rms_in_r));
+    rms_out_l = std::max(outl_level.load(std::memory_order_relaxed) * decay_rate,
+                         rms_to_intensity(rms_out_l));
+    rms_out_r = std::max(outr_level.load(std::memory_order_relaxed) * decay_rate,
+                         rms_to_intensity(rms_out_r));
+    inl_level.store(rms_in_l, std::memory_order_relaxed);
+    inr_level.store(rms_in_r, std::memory_order_relaxed);
+    outl_level.store(rms_out_l, std::memory_order_relaxed);
+    outr_level.store(rms_out_r, std::memory_order_relaxed);
 }
 
 bool ElastikaAudioProcessor::hasEditor() const
