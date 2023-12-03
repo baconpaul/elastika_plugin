@@ -12,6 +12,7 @@ struct AudioParameter
     juce::AudioParameterFloat *param;
     sst::basic_blocks::dsp::SurgeLag<float> lag;
     float last_value;
+    std::atomic<float> level;  // currently unused.
 
     void updateLag()
     {
