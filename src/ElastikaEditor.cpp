@@ -183,6 +183,7 @@ std::unique_ptr<juce::Slider> ElastikaEditor::make_large_knob(float cx, float cy
     kn->setSize(11, 11);
     kn->setRange(0, 1);
     kn->setValue(0.5);
+    kn->setMouseDragSensitivity(100);
     kn->setDoubleClickReturnValue(true, 0.5);
     set_control_position(*kn, cx, cy, dx, dy);
     return kn;
@@ -196,6 +197,7 @@ std::unique_ptr<juce::Slider> ElastikaEditor::make_small_knob(float cx, float cy
     kn->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     kn->setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
     kn->setPopupMenuEnabled(true);
+    kn->setMouseDragSensitivity(100);
     background->addAndMakeVisible(*kn);
     kn->setLookAndFeel(small_lnf.get());
     kn->setSize(6, 6);
