@@ -26,19 +26,13 @@ class ElastikaEditor : public juce::AudioProcessorEditor
 
     void resized() override;
 
-   void paint(juce::Graphics &g) override {
-      g.setFont(juce::FontOptions(20));
-      g.setColour(juce::Colours::pink);
-      g.drawText("UI Temporarily Bypassed", getLocalBounds(), juce::Justification::centred);
-   }
-
   private:
     // Convenience functions for constructing controls.
-    std::unique_ptr<juce::Slider> make_large_knob(float cx, float cy);
-    std::unique_ptr<juce::Slider> make_small_knob(float cx, float cy);
-    std::unique_ptr<sapphire::LedVu> make_led_vu(float cx, float cy,
+    std::unique_ptr<juce::Slider> make_large_knob(const std::string &pos);
+    std::unique_ptr<juce::Slider> make_small_knob(const std::string &pos);
+    std::unique_ptr<sapphire::LedVu> make_led_vu(const std::string &pos,
                                                  const std::atomic<float> &source);
-    std::unique_ptr<juce::Slider> make_slider(float cx, float cy);
+    std::unique_ptr<juce::Slider> make_slider(const std::string &pos);;
 
     ElastikaAudioProcessor &processor;
     std::unique_ptr<juce::LookAndFeel_V4> lnf;

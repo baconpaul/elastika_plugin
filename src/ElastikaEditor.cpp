@@ -7,6 +7,7 @@
 #include "ElastikaBinary.h"
 #include "led_vu.h"
 #include "sapphire_lnf.h"
+#include "sapphire_panel.hpp"
 
 using juce::SliderParameterAttachment;
 
@@ -34,9 +35,6 @@ void set_control_position(juce::Component &control, float cx, float cy, float dx
 ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     : juce::AudioProcessorEditor(&p), processor(p)
 {
-#if OLD_SVG
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
     auto knob_xml = juce::XmlDocument::parse(ElastikaBinary::knob_svg);
     auto marker_xml = juce::XmlDocument::parse(ElastikaBinary::knobmarker_svg);
     auto small_knob_xml = juce::XmlDocument::parse(ElastikaBinary::knobsmall_svg);
@@ -48,119 +46,67 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
                                                 juce::Drawable::createFromSVG(*small_marker_xml));
     setLookAndFeel(lnf.get());
 
-    setSize(300, 600);
-    setResizable(true, true);
-
     std::unique_ptr<juce::XmlElement> xml = juce::XmlDocument::parse(ElastikaBinary::elastika_svg);
     background = juce::Drawable::createFromSVG(*xml);
     background->setInterceptsMouseClicks(false, true);
     addAndMakeVisible(*background);
 
-    // Find controls.
-    auto controls = xml->getChildByAttribute("id", "ControlLayer");
-    if (!controls)
-    {
-        throw std::out_of_range("Missing ControlLayer in SVG");
-    }
-    std::unordered_map<std::string, std::pair<float, float>> found;
-    for (const auto *control : controls->getChildWithTagNameIterator("circle"))
-    {
-        const juce::String &id = control->getStringAttribute("id");
-        float cx = control->getStringAttribute("cx").getFloatValue();
-        float cy = control->getStringAttribute("cy").getFloatValue();
-        found.insert({id.toStdString(), {cx, cy}});
-    }
 
-    float x, y;
-    // Add input tilt section.
-    std::tie(x, y) = found.at("input_tilt_atten");
-    tilt_in.atten = make_small_knob(x, y);
-    std::tie(x, y) = found.at("input_tilt_cv");
-    tilt_in.vu = make_led_vu(x, y, processor.inputTilt.level);
-    std::tie(x, y) = found.at("input_tilt_knob");
-    tilt_in.slider = make_large_knob(x, y);
+    tilt_in.atten = make_small_knob("input_tilt_atten");
+    tilt_in.slider = make_large_knob("input_tilt_knob");
+    tilt_in.vu = make_led_vu("input_tilt_cv", processor.inputTilt.level);
     attachments.push_back(std::make_unique<SliderParameterAttachment>(*(processor.inputTilt.param),
                                                                       *(tilt_in.slider)));
-    // Add output tilt section.
-    std::tie(x, y) = found.at("output_tilt_atten");
-    tilt_out.atten = make_small_knob(x, y);
-    std::tie(x, y) = found.at("output_tilt_cv");
-    tilt_out.vu = make_led_vu(x, y, processor.outputTilt.level);
-    std::tie(x, y) = found.at("output_tilt_knob");
-    tilt_out.slider = make_large_knob(x, y);
+
+    tilt_out.atten = make_small_knob("output_tilt_atten");
+    tilt_out.slider = make_large_knob("output_tilt_knob");
+    tilt_out.vu = make_led_vu("output_tilt_cv", processor.outputTilt.level);
     attachments.push_back(std::make_unique<SliderParameterAttachment>(*(processor.outputTilt.param),
                                                                       *(tilt_out.slider)));
-    // Add friction section.
-    std::tie(x, y) = found.at("fric_atten");
-    fric.atten = make_small_knob(x, y);
-    std::tie(x, y) = found.at("fric_cv");
-    // fric.vu = make_led_vu(x, y);
-    std::tie(x, y) = found.at("fric_slider");
-    fric.slider = make_slider(x, y);
+
+    // these are all missing vus
+    fric.atten = make_small_knob("fric_atten");
+    fric.slider = make_slider("fric_slider");
     attachments.push_back(
         std::make_unique<SliderParameterAttachment>(*(processor.friction.param), *(fric.slider)));
-    // Add stiffness section.
-    std::tie(x, y) = found.at("stif_atten");
-    stif.atten = make_small_knob(x, y);
-    std::tie(x, y) = found.at("stif_cv");
-    // stif.vu = make_led_vu(x, y);
-    std::tie(x, y) = found.at("stif_slider");
-    stif.slider = make_slider(x, y);
+
+    stif.atten = make_small_knob("stif_atten");
+    stif.slider = make_slider("stif_slider");
     attachments.push_back(
         std::make_unique<SliderParameterAttachment>(*(processor.stiffness.param), *(stif.slider)));
-    // Add span section.
-    std::tie(x, y) = found.at("span_atten");
-    span.atten = make_small_knob(x, y);
-    std::tie(x, y) = found.at("span_cv");
-    // span.vu = make_led_vu(x, y);
-    std::tie(x, y) = found.at("span_slider");
-    span.slider = make_slider(x, y);
+
+    span.atten = make_small_knob("span_atten");
+    span.slider = make_slider("span_slider");
     attachments.push_back(
         std::make_unique<SliderParameterAttachment>(*(processor.span.param), *(span.slider)));
-    // Add curl section.
-    std::tie(x, y) = found.at("curl_atten");
-    curl.atten = make_small_knob(x, y);
-    std::tie(x, y) = found.at("curl_cv");
-    // curl.vu = make_led_vu(x, y);
-    std::tie(x, y) = found.at("curl_slider");
-    curl.slider = make_slider(x, y);
+
+    curl.atten = make_small_knob("curl_atten");
+    curl.slider = make_slider("curl_slider");
     attachments.push_back(
         std::make_unique<SliderParameterAttachment>(*(processor.curl.param), *(curl.slider)));
-    // Add mass section.
-    std::tie(x, y) = found.at("mass_atten");
-    mass.atten = make_small_knob(x, y);
-    std::tie(x, y) = found.at("mass_cv");
-    // mass.vu = make_led_vu(x, y);
-    std::tie(x, y) = found.at("mass_slider");
-    mass.slider = make_slider(x, y);
+
+    mass.atten = make_small_knob("mass_atten");
+    mass.slider = make_slider("mass_slider");
     attachments.push_back(
         std::make_unique<SliderParameterAttachment>(*(processor.mass.param), *(mass.slider)));
-    // Input drive.
-    std::tie(x, y) = found.at("drive_knob");
-    in_drive = make_large_knob(x, y);
+
+    in_drive = make_large_knob("drive_knob");
     attachments.push_back(
         std::make_unique<SliderParameterAttachment>(*(processor.drive.param), *(in_drive)));
-    std::tie(x, y) = found.at("audio_left_input");
-    inl_vu = make_led_vu(x, y, processor.inl_level);
-    std::tie(x, y) = found.at("audio_right_input");
-    inr_vu = make_led_vu(x, y, processor.inr_level);
-    // Output level.
-    std::tie(x, y) = found.at("level_knob");
-    out_level = make_large_knob(x, y);
+    inl_vu = make_led_vu("audio_left_input", processor.inl_level);
+    inr_vu = make_led_vu("audio_right_input", processor.inr_level);
+
+
+    out_level = make_large_knob("level_knob");
     attachments.push_back(
         std::make_unique<SliderParameterAttachment>(*(processor.gain.param), *(out_level)));
-    std::tie(x, y) = found.at("audio_left_output");
-    outl_vu = make_led_vu(x, y, processor.outl_level);
-    std::tie(x, y) = found.at("audio_right_output");
-    outr_vu = make_led_vu(x, y, processor.outr_level);
-    // Limiter warning light.
-    std::tie(x, y) = found.at("power_toggle");
-    limiter_warning = make_led_vu(x, y, processor.internal_distortion);
-    // Power toggle. FIXME: add.
-    std::tie(x, y) = found.at("power_gate_input");
-    resized();
-#endif
-    setSize(600,400);
+    outl_vu = make_led_vu("audio_left_output", processor.outl_level);
+    outr_vu = make_led_vu("audio_right_output", processor.outr_level);
+
+    limiter_warning = make_led_vu("power_toggle", processor.internal_distortion);
+
+    setSize(300, 600);
+    setResizable(true, true);
     resized();
 }
 
@@ -174,8 +120,12 @@ void ElastikaEditor::resized()
     }
 }
 
-std::unique_ptr<juce::Slider> ElastikaEditor::make_large_knob(float cx, float cy)
+std::unique_ptr<juce::Slider> ElastikaEditor::make_large_knob(const std::string &pos)
 {
+    auto r = Sapphire::FindComponent("elastika", pos);
+    auto cx = r.cx;
+    auto cy = r.cy;
+
     static constexpr float dx = 0.5f;
     static constexpr float dy = 0.5f;
     auto kn = std::make_unique<juce::Slider>();
@@ -192,8 +142,12 @@ std::unique_ptr<juce::Slider> ElastikaEditor::make_large_knob(float cx, float cy
     return kn;
 }
 
-std::unique_ptr<juce::Slider> ElastikaEditor::make_small_knob(float cx, float cy)
+std::unique_ptr<juce::Slider> ElastikaEditor::make_small_knob(const std::string &pos)
 {
+    auto r = Sapphire::FindComponent("elastika", pos);
+    auto cx = r.cx;
+    auto cy = r.cy;
+
     static constexpr float dx = 0.9166f;
     static constexpr float dy = 0.9166f;
     auto kn = std::make_unique<juce::Slider>();
@@ -208,9 +162,13 @@ std::unique_ptr<juce::Slider> ElastikaEditor::make_small_knob(float cx, float cy
     return kn;
 }
 
-std::unique_ptr<sapphire::LedVu> ElastikaEditor::make_led_vu(float cx, float cy,
+std::unique_ptr<sapphire::LedVu> ElastikaEditor::make_led_vu(const std::string &pos,
                                                              const std::atomic<float> &source)
 {
+    auto r = Sapphire::FindComponent("elastika", pos);
+    auto cx = r.cx;
+    auto cy = r.cy;
+
     static constexpr float dx = 0.5f;
     static constexpr float dy = 0.5f;
     auto led = std::make_unique<sapphire::LedVu>(source);
@@ -220,8 +178,12 @@ std::unique_ptr<sapphire::LedVu> ElastikaEditor::make_led_vu(float cx, float cy,
     return led;
 }
 
-std::unique_ptr<juce::Slider> ElastikaEditor::make_slider(float cx, float cy)
+std::unique_ptr<juce::Slider> ElastikaEditor::make_slider(const std::string &pos)
 {
+    auto r = Sapphire::FindComponent("elastika", pos);
+    auto cx = r.cx;
+    auto cy = r.cy;
+
     static constexpr float dx = 0.6875f;
     static constexpr float dy = 0.6875f;
     auto sl = std::make_unique<juce::Slider>();
