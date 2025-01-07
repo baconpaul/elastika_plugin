@@ -28,8 +28,8 @@ endif()
 
 set(ELASTIKA_DIR libs/sapphire/src)
 add_library(elastika-dsp STATIC
-        ${ELASTIKA_DIR}/mesh_hex.cpp
         ${ELASTIKA_DIR}/mesh_physics.cpp
+        ${ELASTIKA_DIR}/elastika_mesh.cpp
         )
 target_include_directories(elastika-dsp PUBLIC ${ELASTIKA_DIR} libs/simde)
 target_compile_definitions(elastika-dsp PUBLIC NO_RACK_DEPENDENCY)
