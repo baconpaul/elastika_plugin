@@ -3,7 +3,12 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "Build for 10.15")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(elastika_plugin VERSION 0.9.0 LANGUAGES CXX)
+project(elastika_plugin VERSION 0.9.0 LANGUAGES C CXX)
+
+if (APPLE)
+    enable_language(OBJC)
+    enable_language(OBJCXX)
+endif()
 
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 17)
@@ -91,7 +96,6 @@ target_compile_definitions(elastika-filter PUBLIC
     JUCE_USE_CURL=0
     JUCE_WEB_BROWSER=0
 
-    JUCE_DISPLAY_SPLASH_SCREEN=0
     JUCE_REPORT_APP_USAGE=0
 
     JUCE_ALSA=1

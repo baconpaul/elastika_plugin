@@ -34,6 +34,7 @@ void set_control_position(juce::Component &control, float cx, float cy, float dx
 ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     : juce::AudioProcessorEditor(&p), processor(p)
 {
+#if OLD_SVG
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     auto knob_xml = juce::XmlDocument::parse(ElastikaBinary::knob_svg);
@@ -157,7 +158,9 @@ ElastikaEditor::ElastikaEditor(ElastikaAudioProcessor &p)
     limiter_warning = make_led_vu(x, y, processor.internal_distortion);
     // Power toggle. FIXME: add.
     std::tie(x, y) = found.at("power_gate_input");
-
+    resized();
+#endif
+    setSize(600,400);
     resized();
 }
 

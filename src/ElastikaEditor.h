@@ -26,6 +26,12 @@ class ElastikaEditor : public juce::AudioProcessorEditor
 
     void resized() override;
 
+   void paint(juce::Graphics &g) override {
+      g.setFont(juce::FontOptions(20));
+      g.setColour(juce::Colours::pink);
+      g.drawText("UI Temporarily Bypassed", getLocalBounds(), juce::Justification::centred);
+   }
+
   private:
     // Convenience functions for constructing controls.
     std::unique_ptr<juce::Slider> make_large_knob(float cx, float cy);
