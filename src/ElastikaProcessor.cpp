@@ -104,6 +104,7 @@ void ElastikaAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     // Snap lag target values.
     friction.updateLag();
     span.updateLag();
+    stiffness.updateLag();
     curl.updateLag();
     mass.updateLag();
     drive.updateLag();
